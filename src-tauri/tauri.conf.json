@@ -12,7 +12,14 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false
+      "dialog": {
+        "all": true
+      },
+      "fs": {
+        "all": true,
+        "readDir": true,
+        "scope": ["**"]
+      }
     },
     "bundle": {
       "active": true,
