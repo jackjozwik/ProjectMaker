@@ -32,14 +32,15 @@ const useAppFunctions = () => {
   }, [projectRef, artistRef]);
 
   // Project creation
-  const createProject = useCallback(async () => {
+  const createProject = useCallback(async (templatePath = null) => {
     try {
       setIsLoading(true);
       const response = await invoke('create_project_structure', {
         config: {
           project_ref: projectRef.toUpperCase(),
           artist_ref: artistRef.toUpperCase(),
-          base_path: basePath
+          base_path: basePath,
+          template_path: templatePath // Add template path to config
         }
       });
       setToastMessage(response);
@@ -50,6 +51,15 @@ const useAppFunctions = () => {
       setIsLoading(false);
     }
   }, [projectRef, artistRef, basePath]);
+  
+  const handleCreateProject = useCallback((templatePath) => {
+    const errors = validateInputs();
+    if (Object.keys(errors).length === 0) {
+      createProject(templatePath);
+    } else {
+      setValidationErrors(errors);
+    }
+  }, [validateInputs, createProject]);
 
   // Only update the loadDirectoryStructure function in useAppFunctions.jsx
   // Update only the loadDirectoryStructure function in useAppFunctions.jsx
@@ -85,16 +95,6 @@ const useAppFunctions = () => {
   useEffect(() => {
     if (basePath) localStorage.setItem('lastBasePath', basePath);
   }, [basePath]);
-
-  // Action handlers
-  const handleCreateProject = useCallback(() => {
-    const errors = validateInputs();
-    if (Object.keys(errors).length === 0) {
-      createProject();
-    } else {
-      setValidationErrors(errors);
-    }
-  }, [validateInputs, createProject]);
 
   const handleBasePathSelect = useCallback(async () => {
     try {
