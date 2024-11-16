@@ -146,7 +146,7 @@ function App() {
 
                 {/* Template Selection */}
                 <div>
-                  <div className="flex justify-between items-center mb-2">
+                  <div className="flex justify-between items-center mb-2 pt-4 border-t">
                     <label className="block text-sm font-medium text-gray-700">
                       Project Template (Optional)
                     </label>
@@ -186,7 +186,7 @@ function App() {
                 </div>
 
                 {/* Project Type Toggle */}
-                <div className="flex items-center justify-between pt-4 border-t">
+                {/* <div className="flex items-center justify-between">
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -205,7 +205,7 @@ function App() {
                       Project Folder
                     </span>
                   </label>
-                </div>
+                </div> */}
 
                 {/* Action Buttons */}
                 <div className="space-y-3">
