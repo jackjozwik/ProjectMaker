@@ -52,40 +52,157 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
   // In the DirectoryTree component:
   const createFolders = async () => {
     try {
-        setIsLoading(true);
-        
-        // Get the full path from the node's path property
-        const projectPath = node.path;
-        
-        await invoke('debug_log', { 
-            message: `Creating folders with full project path: ${projectPath}`
-        });
-        
-        const baseFolders = ['maya/images', 'houdini'];
-        
-        for (const baseFolder of baseFolders) {
-            const fullFolderPath = `${projectPath}/${baseFolder}/${newFolderName.toUpperCase()}`;
-            
-            try {
-                await invoke('create_folder', {
-                    path: fullFolderPath,
-                    createParents: true
-                });
-            } catch (error) {
-                console.error(`Error creating folder: ${error}`);
-            }
-        }
+      setIsLoading(true);
+      const projectPath = node.path;
 
-        setIsDialogOpen(false);
-        if (onRefresh) {
-            await onRefresh(); // This will trigger refreshAfterAction
+      // Define complete folder structures for each type
+      const getFolderStructure = (type, name) => {
+        const upperName = name.toUpperCase();
+        switch (type) {
+          case 'asset':
+            return [
+              // Maya folders
+              `maya/assets/${upperName}`,
+              `maya/cache/${upperName}/alembic`,
+              `maya/cache/${upperName}/fbx`,
+              `maya/cache/${upperName}/nCache`,
+              `maya/cache/${upperName}/obj`,
+              `maya/cache/${upperName}/particles`,
+              `maya/data/${upperName}/atom`,
+              `maya/data/${upperName}/skinCluster`,
+              `maya/images/${upperName}`,
+              `maya/scripts/${upperName}`,
+              `maya/sourceImages/${upperName}/substance`,
+              `maya/sourceImages/${upperName}/zbrush`,
+
+              // Houdini folders
+              `houdini/${upperName}/abc`,
+              `houdini/${upperName}/audio`,
+              `houdini/${upperName}/comp`,
+              `houdini/${upperName}/desk`,
+              `houdini/${upperName}/flip`,
+              `houdini/${upperName}/geo/fbx`,
+              `houdini/${upperName}/geo/obj`,
+              `houdini/${upperName}/hda`,
+              `houdini/${upperName}/otls`,
+              `houdini/${upperName}/render`,
+              `houdini/${upperName}/scripts`,
+              `houdini/${upperName}/sim`,
+              `houdini/${upperName}/tex`,
+              `houdini/${upperName}/video`,
+
+              // Nuke folders
+              `nuke/${upperName}/renders`,
+              `nuke/${upperName}/scripts`
+            ];
+          case 'rnd':
+            return [
+              // Maya folders
+              `maya/cache/${upperName}/alembic`,
+              `maya/cache/${upperName}/fbx`,
+              `maya/cache/${upperName}/nCache`,
+              `maya/cache/${upperName}/obj`,
+              `maya/cache/${upperName}/particles`,
+              `maya/data/${upperName}/atom`,
+              `maya/data/${upperName}/skinCluster`,
+              `maya/images/${upperName}`,
+              `maya/scenes/${upperName}`,
+              `maya/scripts/${upperName}`,
+              `maya/sourceImages/${upperName}/substance`,
+              `maya/sourceImages/${upperName}/zbrush`,
+
+              // Houdini folders
+              `houdini/${upperName}/abc`,
+              `houdini/${upperName}/audio`,
+              `houdini/${upperName}/comp`,
+              `houdini/${upperName}/desk`,
+              `houdini/${upperName}/flip`,
+              `houdini/${upperName}/geo/fbx`,
+              `houdini/${upperName}/geo/obj`,
+              `houdini/${upperName}/hda`,
+              `houdini/${upperName}/otls`,
+              `houdini/${upperName}/render`,
+              `houdini/${upperName}/scripts`,
+              `houdini/${upperName}/sim`,
+              `houdini/${upperName}/tex`,
+              `houdini/${upperName}/video`,
+
+              // Nuke folders
+              `nuke/${upperName}/renders`,
+              `nuke/${upperName}/scripts`
+            ];
+          case 'shot':
+            return [
+              // Maya folders
+              `maya/cache/${upperName}/alembic`,
+              `maya/cache/${upperName}/fbx`,
+              `maya/cache/${upperName}/nCache`,
+              `maya/cache/${upperName}/obj`,
+              `maya/cache/${upperName}/particles`,
+              `maya/data/${upperName}/atom`,
+              `maya/data/${upperName}/skinCluster`,
+              `maya/images/${upperName}`,
+              `maya/scenes/${upperName}`,
+              `maya/scripts/${upperName}`,
+
+              // Houdini folders
+              `houdini/${upperName}/abc`,
+              `houdini/${upperName}/audio`,
+              `houdini/${upperName}/comp`,
+              `houdini/${upperName}/desk`,
+              `houdini/${upperName}/flip`,
+              `houdini/${upperName}/geo/fbx`,
+              `houdini/${upperName}/geo/obj`,
+              `houdini/${upperName}/hda`,
+              `houdini/${upperName}/otls`,
+              `houdini/${upperName}/render`,
+              `houdini/${upperName}/scripts`,
+              `houdini/${upperName}/sim`,
+              `houdini/${upperName}/tex`,
+              `houdini/${upperName}/video`,
+
+              // Nuke folders
+              `nuke/${upperName}/renders`,
+              `nuke/${upperName}/scripts`
+            ];
+          default:
+            return [];
         }
+      };
+
+      const foldersToCreate = getFolderStructure(newFolderType, newFolderName);
+
+      // Create each folder
+      for (const folder of foldersToCreate) {
+        const fullFolderPath = `${projectPath}/${folder}`;
+
+        try {
+          await invoke('debug_log', {
+            message: `Creating folder: ${fullFolderPath}`
+          });
+
+          await invoke('create_folder', {
+            path: fullFolderPath,
+            createParents: true
+          });
+        } catch (error) {
+          await invoke('debug_log', {
+            message: `Error creating folder ${fullFolderPath}: ${error}`
+          });
+          // Continue with other folders even if one fails
+        }
+      }
+
+      setIsDialogOpen(false);
+      if (onRefresh) {
+        await onRefresh();
+      }
     } catch (error) {
-        console.error('Error in createFolders:', error);
+      console.error('Error in createFolders:', error);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
+  };
 
   return (
     <div className="directory-tree" onContextMenu={handleContextMenu}>
