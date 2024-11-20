@@ -161,12 +161,53 @@ fn read_dir_recursive(path: &PathBuf) -> Result<DirEntry, std::io::Error> {
     }
 }
 
+#[tauri::command]
+async fn create_folder(path: String, create_parents: bool) -> Result<String, String> {
+    println!("Creating folder:");
+    println!("  - Full path: {}", path);
+    println!("  - Create parents: {}", create_parents);
+    
+    let path_buf = PathBuf::from(&path);
+    println!("  - Absolute path: {}", path_buf.canonicalize().unwrap_or(path_buf.clone()).display());
+    
+    if create_parents {
+        match fs::create_dir_all(&path_buf) {
+            Ok(_) => {
+                println!("  - Successfully created directory and parents");
+                println!("  - Verifying creation...");
+                if path_buf.exists() {
+                    println!("  - Verified: Directory exists");
+                } else {
+                    println!("  - Warning: Directory does not exist after creation");
+                }
+            },
+            Err(e) => {
+                println!("  - Error creating directory: {}", e);
+                return Err(format!("Failed to create directory: {}", e));
+            }
+        }
+    } else {
+        fs::create_dir(&path_buf)
+            .map_err(|e| format!("Failed to create directory: {}", e))?;
+    }
+    
+    Ok(format!("Directory created successfully at {}", path_buf.display()))
+}
+
+#[tauri::command]
+async fn debug_log(message: String) {
+    println!("Debug: {}", message);
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             create_project_structure,
             get_directory_structure,
-            read_template
+            read_template,
+            create_folder,
+            debug_log  
+
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
