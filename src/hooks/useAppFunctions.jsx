@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { open } from '@tauri-apps/api/dialog';
 import { readDir } from '@tauri-apps/api/fs';
@@ -18,6 +18,47 @@ const useAppFunctions = () => {
   const [isProjectFolder, setIsProjectFolder] = useState(true);
   const [showSidebar, setShowSidebar] = useState(true);
   const [toastMessage, setToastMessage] = useState('');
+  // Add a debounced refresh timestamp
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const refreshTimeoutRef = useRef(null);
+
+  // Only update the loadDirectoryStructure function in useAppFunctions.jsx
+  // Enhanced loadDirectoryStructure with debouncing
+  const loadDirectoryStructure = useCallback(async (force = false) => {
+    try {
+      if (!basePath) return;
+
+      // Skip if last refresh was less than 500ms ago and not forced
+      if (!force && Date.now() - lastRefresh < 500) {
+        return;
+      }
+
+      const structure = await invoke('get_directory_structure', {
+        path: basePath
+      });
+
+      setDirectoryStructure(structure);
+      setLastRefresh(Date.now());
+    } catch (error) {
+      console.error('Failed to load directory structure:', error);
+      setToastMessage('Failed to load directory structure');
+    }
+  }, [basePath, lastRefresh]);
+
+
+  // Refresh after actions (with debouncing)
+  const refreshAfterAction = useCallback(() => {
+    // Clear any pending refresh
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+
+    // Schedule a new refresh
+    refreshTimeoutRef.current = setTimeout(() => {
+      loadDirectoryStructure(true); // Force refresh
+      refreshTimeoutRef.current = null;
+    }, 500);
+  }, [loadDirectoryStructure]);
 
   // Validation function
   const validateInputs = useCallback(() => {
@@ -51,50 +92,18 @@ const useAppFunctions = () => {
       setIsLoading(false);
     }
   }, [projectRef, artistRef, basePath]);
-  
+
+  // Update createProject to use refreshAfterAction
   const handleCreateProject = useCallback((templatePath) => {
     const errors = validateInputs();
     if (Object.keys(errors).length === 0) {
-      createProject(templatePath);
+      createProject(templatePath).then(() => {
+        refreshAfterAction();
+      });
     } else {
       setValidationErrors(errors);
     }
-  }, [validateInputs, createProject]);
-
-  // Only update the loadDirectoryStructure function in useAppFunctions.jsx
-  // Update only the loadDirectoryStructure function in useAppFunctions.jsx
-  const loadDirectoryStructure = useCallback(async () => {
-    try {
-      if (!basePath) return;
-      
-      // Use the new Rust command for directory reading
-      const structure = await invoke('get_directory_structure', {
-        path: basePath
-      });
-      
-      // Set the structure directly as it's already in the format we want
-      setDirectoryStructure(structure);
-    } catch (error) {
-      console.error('Failed to load directory structure:', error);
-      setToastMessage('Failed to load directory structure');
-    }
-  }, [basePath]);
-
-  // Effects
-  useEffect(() => {
-    if (basePath) {
-      loadDirectoryStructure();
-    }
-  }, [basePath, loadDirectoryStructure]);
-
-  // Save to localStorage
-  useEffect(() => {
-    if (artistRef) localStorage.setItem('artistRef', artistRef);
-  }, [artistRef]);
-
-  useEffect(() => {
-    if (basePath) localStorage.setItem('lastBasePath', basePath);
-  }, [basePath]);
+  }, [validateInputs, createProject, refreshAfterAction]);
 
   const handleBasePathSelect = useCallback(async () => {
     try {
@@ -122,6 +131,30 @@ const useAppFunctions = () => {
     });
   }, []);
 
+  //Use Effects
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      loadDirectoryStructure();
+    }, 5000); // 5 second interval
+
+    return () => clearInterval(intervalId);
+  }, [loadDirectoryStructure]);
+
+  useEffect(() => {
+    if (basePath) {
+      loadDirectoryStructure();
+    }
+  }, [basePath, loadDirectoryStructure]);
+
+  // Save to localStorage
+  useEffect(() => {
+    if (artistRef) localStorage.setItem('artistRef', artistRef);
+  }, [artistRef]);
+
+  useEffect(() => {
+    if (basePath) localStorage.setItem('lastBasePath', basePath);
+  }, [basePath]);
+
   return {
     state: {
       artistRef,
@@ -144,7 +177,9 @@ const useAppFunctions = () => {
       setToastMessage,
       handleBasePathSelect,
       handleCreateProject,
-      toggleNode
+      toggleNode,
+      refreshDirectoryStructure: () => loadDirectoryStructure(true), // Add this
+      refreshAfterAction,  // Add this
     }
   };
 };

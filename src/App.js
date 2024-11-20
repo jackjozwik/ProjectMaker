@@ -206,7 +206,7 @@ function App() {
                 directoryStructure={directoryStructure}
                 expandedNodes={expandedNodes}
                 onToggleNode={actions.toggleNode}
-                onRefresh={actions.loadDirectoryStructure}
+                onRefresh={actions.refreshAfterAction}
                 basePath={basePath}
               />
             </div>

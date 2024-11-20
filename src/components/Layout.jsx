@@ -52,54 +52,40 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
   // In the DirectoryTree component:
   const createFolders = async () => {
     try {
-      setIsLoading(true);
-
-      // Get the full path from the node's path property
-      const projectPath = node.path; // Use node.path instead of just path
-
-      await invoke('debug_log', {
-        message: `Creating folders with full project path: ${projectPath}`
-      });
-
-      const baseFolders = ['maya/images', 'houdini'];
-
-      for (const baseFolder of baseFolders) {
-        const fullFolderPath = `${projectPath}/${baseFolder}/${newFolderName.toUpperCase()}`;
-
-        await invoke('debug_log', {
-          message: `Attempting to create folder: ${fullFolderPath}`
+        setIsLoading(true);
+        
+        // Get the full path from the node's path property
+        const projectPath = node.path;
+        
+        await invoke('debug_log', { 
+            message: `Creating folders with full project path: ${projectPath}`
         });
-
-        try {
-          const result = await invoke('create_folder', {
-            path: fullFolderPath,
-            createParents: true
-          });
-          await invoke('debug_log', {
-            message: `Create folder result: ${result}`
-          });
-        } catch (error) {
-          await invoke('debug_log', {
-            message: `Error creating folder: ${error}`
-          });
+        
+        const baseFolders = ['maya/images', 'houdini'];
+        
+        for (const baseFolder of baseFolders) {
+            const fullFolderPath = `${projectPath}/${baseFolder}/${newFolderName.toUpperCase()}`;
+            
+            try {
+                await invoke('create_folder', {
+                    path: fullFolderPath,
+                    createParents: true
+                });
+            } catch (error) {
+                console.error(`Error creating folder: ${error}`);
+            }
         }
-      }
 
-      setIsDialogOpen(false);
-      if (onRefresh) {
-        await invoke('debug_log', {
-          message: `Refreshing directory structure`
-        });
-        await onRefresh();
-      }
+        setIsDialogOpen(false);
+        if (onRefresh) {
+            await onRefresh(); // This will trigger refreshAfterAction
+        }
     } catch (error) {
-      await invoke('debug_log', {
-        message: `Error in createFolders: ${error}`
-      });
+        console.error('Error in createFolders:', error);
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
 
   return (
     <div className="directory-tree" onContextMenu={handleContextMenu}>
