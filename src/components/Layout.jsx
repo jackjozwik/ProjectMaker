@@ -16,7 +16,7 @@ const SidebarToggle = ({ showSidebar, onToggle }) => (
 
 // DirectoryTree component
 // Update only the DirectoryTree component in Layout.jsx
-const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, basePath }) => {
+const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, setToastMessage, basePath }) => {
   const [contextMenu, setContextMenu] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newFolderType, setNewFolderType] = useState(null);
@@ -54,116 +54,118 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
     try {
       setIsLoading(true);
       const projectPath = node.path.replace(/\\/g, '/').replace(/\/$/, '');
+      const projectFolderName = node.name; // This will be your ABC_XYZ format
+
 
       // Define complete folder structures for each type
       const getFolderStructure = (type, name) => {
-        const upperName = name.toUpperCase();
+        const folderName = name;
         switch (type) {
           case 'asset':
             return [
               // Maya folders
-              `maya/assets/${upperName}`,
-              `maya/cache/${upperName}/alembic`,
-              `maya/cache/${upperName}/fbx`,
-              `maya/cache/${upperName}/nCache`,
-              `maya/cache/${upperName}/obj`,
-              `maya/cache/${upperName}/particles`,
-              `maya/data/${upperName}/atom`,
-              `maya/data/${upperName}/skinCluster`,
-              `maya/images/${upperName}`,
-              `maya/scripts/${upperName}`,
-              `maya/sourceImages/${upperName}/substance`,
-              `maya/sourceImages/${upperName}/zbrush`,
+              `maya/assets/${folderName}`,
+              `maya/cache/${folderName}/alembic`,
+              `maya/cache/${folderName}/fbx`,
+              `maya/cache/${folderName}/nCache`,
+              `maya/cache/${folderName}/obj`,
+              `maya/cache/${folderName}/particles`,
+              `maya/data/${folderName}/atom`,
+              `maya/data/${folderName}/skinCluster`,
+              `maya/images/${folderName}`,
+              `maya/scripts/${folderName}`,
+              `maya/sourceImages/${folderName}/substance`,
+              `maya/sourceImages/${folderName}/zbrush`,
 
               // Houdini folders
-              `houdini/${upperName}/abc`,
-              `houdini/${upperName}/audio`,
-              `houdini/${upperName}/comp`,
-              `houdini/${upperName}/desk`,
-              `houdini/${upperName}/flip`,
-              `houdini/${upperName}/geo/fbx`,
-              `houdini/${upperName}/geo/obj`,
-              `houdini/${upperName}/hda`,
-              `houdini/${upperName}/otls`,
-              `houdini/${upperName}/render`,
-              `houdini/${upperName}/scripts`,
-              `houdini/${upperName}/sim`,
-              `houdini/${upperName}/tex`,
-              `houdini/${upperName}/video`,
+              `houdini/${folderName}/abc`,
+              `houdini/${folderName}/audio`,
+              `houdini/${folderName}/comp`,
+              `houdini/${folderName}/desk`,
+              `houdini/${folderName}/flip`,
+              `houdini/${folderName}/geo/fbx`,
+              `houdini/${folderName}/geo/obj`,
+              `houdini/${folderName}/hda`,
+              `houdini/${folderName}/otls`,
+              `houdini/${folderName}/render`,
+              `houdini/${folderName}/scripts`,
+              `houdini/${folderName}/sim`,
+              `houdini/${folderName}/tex`,
+              `houdini/${folderName}/video`,
 
               // Nuke folders
-              `nuke/${upperName}/renders`,
-              `nuke/${upperName}/scripts`
+              `nuke/${folderName}/renders`,
+              `nuke/${folderName}/scripts`
             ];
           case 'rnd':
             return [
               // Maya folders
-              `maya/cache/${upperName}/alembic`,
-              `maya/cache/${upperName}/fbx`,
-              `maya/cache/${upperName}/nCache`,
-              `maya/cache/${upperName}/obj`,
-              `maya/cache/${upperName}/particles`,
-              `maya/data/${upperName}/atom`,
-              `maya/data/${upperName}/skinCluster`,
-              `maya/images/${upperName}`,
-              `maya/scenes/${upperName}`,
-              `maya/scripts/${upperName}`,
-              `maya/sourceImages/${upperName}/substance`,
-              `maya/sourceImages/${upperName}/zbrush`,
+              `maya/cache/${folderName}/alembic`,
+              `maya/cache/${folderName}/fbx`,
+              `maya/cache/${folderName}/nCache`,
+              `maya/cache/${folderName}/obj`,
+              `maya/cache/${folderName}/particles`,
+              `maya/data/${folderName}/atom`,
+              `maya/data/${folderName}/skinCluster`,
+              `maya/images/${folderName}`,
+              `maya/scenes/${folderName}`,
+              `maya/scripts/${folderName}`,
+              `maya/sourceImages/${folderName}/substance`,
+              `maya/sourceImages/${folderName}/zbrush`,
 
               // Houdini folders
-              `houdini/${upperName}/abc`,
-              `houdini/${upperName}/audio`,
-              `houdini/${upperName}/comp`,
-              `houdini/${upperName}/desk`,
-              `houdini/${upperName}/flip`,
-              `houdini/${upperName}/geo/fbx`,
-              `houdini/${upperName}/geo/obj`,
-              `houdini/${upperName}/hda`,
-              `houdini/${upperName}/otls`,
-              `houdini/${upperName}/render`,
-              `houdini/${upperName}/scripts`,
-              `houdini/${upperName}/sim`,
-              `houdini/${upperName}/tex`,
-              `houdini/${upperName}/video`,
+              `houdini/${folderName}/abc`,
+              `houdini/${folderName}/audio`,
+              `houdini/${folderName}/comp`,
+              `houdini/${folderName}/desk`,
+              `houdini/${folderName}/flip`,
+              `houdini/${folderName}/geo/fbx`,
+              `houdini/${folderName}/geo/obj`,
+              `houdini/${folderName}/hda`,
+              `houdini/${folderName}/otls`,
+              `houdini/${folderName}/render`,
+              `houdini/${folderName}/scripts`,
+              `houdini/${folderName}/sim`,
+              `houdini/${folderName}/tex`,
+              `houdini/${folderName}/video`,
 
               // Nuke folders
-              `nuke/${upperName}/renders`,
-              `nuke/${upperName}/scripts`
+              `nuke/${folderName}/renders`,
+              `nuke/${folderName}/scripts`
             ];
           case 'shot':
             return [
               // Maya folders
-              `maya/cache/${upperName}/alembic`,
-              `maya/cache/${upperName}/fbx`,
-              `maya/cache/${upperName}/nCache`,
-              `maya/cache/${upperName}/obj`,
-              `maya/cache/${upperName}/particles`,
-              `maya/data/${upperName}/atom`,
-              `maya/data/${upperName}/skinCluster`,
-              `maya/images/${upperName}`,
-              `maya/scenes/${upperName}`,
-              `maya/scripts/${upperName}`,
+              `maya/cache/${folderName}/alembic`,
+              `maya/cache/${folderName}/fbx`,
+              `maya/cache/${folderName}/nCache`,
+              `maya/cache/${folderName}/obj`,
+              `maya/cache/${folderName}/particles`,
+              `maya/data/${folderName}/atom`,
+              `maya/data/${folderName}/skinCluster`,
+              `maya/images/${folderName}`,
+              `maya/scenes/${folderName}`,
+              `maya/scripts/${folderName}`,
 
               // Houdini folders
-              `houdini/${upperName}/abc`,
-              `houdini/${upperName}/audio`,
-              `houdini/${upperName}/comp`,
-              `houdini/${upperName}/desk`,
-              `houdini/${upperName}/flip`,
-              `houdini/${upperName}/geo/fbx`,
-              `houdini/${upperName}/geo/obj`,
-              `houdini/${upperName}/hda`,
-              `houdini/${upperName}/otls`,
-              `houdini/${upperName}/render`,
-              `houdini/${upperName}/scripts`,
-              `houdini/${upperName}/sim`,
-              `houdini/${upperName}/tex`,
-              `houdini/${upperName}/video`,
+              `houdini/${folderName}/abc`,
+              `houdini/${folderName}/audio`,
+              `houdini/${folderName}/comp`,
+              `houdini/${folderName}/desk`,
+              `houdini/${folderName}/flip`,
+              `houdini/${folderName}/geo/fbx`,
+              `houdini/${folderName}/geo/obj`,
+              `houdini/${folderName}/hda`,
+              `houdini/${folderName}/otls`,
+              `houdini/${folderName}/render`,
+              `houdini/${folderName}/scripts`,
+              `houdini/${folderName}/sim`,
+              `houdini/${folderName}/tex`,
+              `houdini/${folderName}/video`,
 
               // Nuke folders
-              `nuke/${upperName}/renders`,
-              `nuke/${upperName}/scripts`
+              `nuke/${folderName}/renders`,
+              `nuke/${folderName}/scripts`
             ];
           default:
             return [];
@@ -195,12 +197,21 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
         }
       }
 
-      setIsDialogOpen(false);
+      const successMessages = {
+        'asset': `Asset "${newFolderName}" created in ${projectFolderName}`,
+        'rnd': `R&D "${newFolderName}" created in ${projectFolderName}`,
+        'shot': `Shot "${newFolderName}" created in ${projectFolderName}`
+      };
+
+      
       if (onRefresh) {
         await onRefresh();
       }
+      setIsDialogOpen(false);
+      setToastMessage(successMessages[newFolderType]);
     } catch (error) {
       console.error('Error in createFolders:', error);
+      setToastMessage(`Error: Failed to create ${newFolderType}`);
     } finally {
       setIsLoading(false);
     }
@@ -268,6 +279,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
                 onToggle={onToggle}
                 expandedNodes={expandedNodes}
                 onRefresh={onRefresh}
+                setToastMessage={setToastMessage}  // Add this prop
               />
             ))}
         </div>
@@ -297,7 +309,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={`Enter ${newFolderType} name`}
+              placeholder={`Enter ${newFolderType === 'asset' ? 'asset' : newFolderType === 'rnd' ? 'R&D' : 'shot'} name`}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               autoFocus
             />
@@ -327,7 +339,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
 
 
 // Sidebar component
-const Sidebar = ({ showSidebar, directoryStructure, expandedNodes, onToggleNode, onRefresh, basePath }) => {
+const Sidebar = ({ showSidebar, directoryStructure, expandedNodes, onToggleNode, onRefresh, setToastMessage, basePath }) => {
   if (!showSidebar) return null;
 
   return (
@@ -340,6 +352,7 @@ const Sidebar = ({ showSidebar, directoryStructure, expandedNodes, onToggleNode,
             expandedNodes={expandedNodes}
             onRefresh={onRefresh}
             basePath={basePath}  // Pass basePath to DirectoryTree
+            setToastMessage={setToastMessage}  // Add this prop
           />
         )}
       </div>

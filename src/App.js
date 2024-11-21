@@ -221,6 +221,7 @@ function App() {
                 onToggleNode={actions.toggleNode}
                 onRefresh={actions.refreshAfterAction}
                 basePath={basePath}
+                setToastMessage={actions.setToastMessage}  // Add this prop
               />
             </div>
           </div>
