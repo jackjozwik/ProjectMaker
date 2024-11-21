@@ -71,14 +71,14 @@ const useAppFunctions = () => {
     const errors = {};
 
     // Regex for alphanumeric validation (letters and numbers)
-    const alphanumericRegex = /^[A-Z0-9]{3}$/;
+    const alphanumericRegex = /^[A-Z]{3}$/;
 
     if (!alphanumericRegex.test(projectRef.toUpperCase())) {
-      errors.projectRef = 'Project code must be exactly 3 alphanumeric characters';
+      errors.projectRef = 'Project code must be exactly 3 letters (A-Z)';
     }
 
     if (!alphanumericRegex.test(artistRef.toUpperCase())) {
-      errors.artistRef = 'Artist code must be exactly 3 alphanumeric characters';
+      errors.artistRef = 'Artist code must be exactly 3 letters (A-Z)';
     }
 
     return errors;
@@ -149,24 +149,22 @@ const useAppFunctions = () => {
 
   // Modify the input handlers to enforce uppercase and allow numbers
   const handleArtistRefChange = useCallback((e) => {
-    // Allow only letters, numbers
-    const value = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    // Allow only letters
+    const value = e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase();
     if (value.length <= 3) {
       setArtistRef(value);
-
-      //Clear valdiation errors
-      if (/^[A-Z0-9]{3}$/.test(value)) {
+      if (/^[A-Z]{3}$/.test(value)) {
         setValidationErrors(prev => ({ ...prev, artistRef: undefined }));
       }
     }
   }, []);
 
   const handleProjectRefChange = useCallback((e) => {
-    // Allow only letters, numbers
-    const value = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    // Allow only letters
+    const value = e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase();
     if (value.length <= 3) {
       setProjectRef(value);
-      if (/^[A-Z0-9]{3}$/.test(value)) {
+      if (/^[A-Z]{3}$/.test(value)) {
         setValidationErrors(prev => ({ ...prev, projectRef: undefined }));
       }
     }

@@ -1,4 +1,4 @@
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Folder, FolderOpen } from 'lucide-react';
 import React, { useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './Dialog';
@@ -28,7 +28,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
   const fullPath = path ? `${path}/${node.name}` : node.name;
   const isExpanded = expandedNodes.has(fullPath);
   const hasChildren = node.children && node.children.length > 0;
-  const isProjectFolder = /^[A-Z0-9]{3}_[A-Z0-9]{3}$/.test(node.name);
+  const isProjectFolder = /^[A-Z]{3}_[A-Z]{3}$/.test(node.name);
 
 
   const handleContextMenu = (e) => {
@@ -176,24 +176,24 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
       for (const folder of foldersToCreate) {
         // Normalize the path joining
         const fullFolderPath = `${projectPath}/${folder}`
-            .replace(/\\/g, '/')  // Convert backslashes to forward slashes
-            .replace(/\/+/g, '/'); // Remove any double slashes
-        
+          .replace(/\\/g, '/')  // Convert backslashes to forward slashes
+          .replace(/\/+/g, '/'); // Remove any double slashes
+
         try {
-            await invoke('debug_log', { 
-                message: `Creating folder: ${fullFolderPath}`
-            });
-            
-            await invoke('create_folder', {
-                path: fullFolderPath,
-                createParents: true
-            });
+          await invoke('debug_log', {
+            message: `Creating folder: ${fullFolderPath}`
+          });
+
+          await invoke('create_folder', {
+            path: fullFolderPath,
+            createParents: true
+          });
         } catch (error) {
-            await invoke('debug_log', { 
-                message: `Error creating folder ${fullFolderPath}: ${error}`
-            });
+          await invoke('debug_log', {
+            message: `Error creating folder ${fullFolderPath}: ${error}`
+          });
         }
-    }
+      }
 
       setIsDialogOpen(false);
       if (onRefresh) {
@@ -206,22 +206,47 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && newFolderName && !isLoading) {
+      createFolders();
+    }
+  };
+
   return (
     <div className="directory-tree" onContextMenu={handleContextMenu}>
       {node.name && (
         <div
-          className="directory-item px-2 py-1 hover:bg-gray-100 rounded cursor-pointer flex items-center gap-1"
+          className="directory-item px-2 py-1 hover:bg-gray-100 rounded cursor-pointer flex items-center gap-1.5"
           onClick={() => hasChildren && onToggle(fullPath)}
         >
-          <span className="directory-icon w-4 text-center">
-            {hasChildren ? (isExpanded ? '▼' : '▶') : ''}
+          <span className="directory-icon flex items-center justify-center w-4 h-4 text-gray-400">
+            {hasChildren && (
+              isExpanded ?
+                <ChevronDown size={16} className="shrink-0" /> :
+                <ChevronRight size={16} className="shrink-0" />
+            )}
           </span>
 
-          <span className="directory-icon">
-            {hasChildren ? '📁' : '📁'}
+          <span className="directory-icon flex items-center">
+            {isExpanded ?
+              <FolderOpen
+                size={16}
+                className="shrink-0"
+                stroke="#e4b650"  // Slightly darker border
+                strokeWidth={2}
+                fill="#f6cc57"    // Warm folder color
+              /> :
+              <Folder
+                size={16}
+                className="shrink-0"
+                stroke="#e4b650"
+                strokeWidth={2}
+                fill="#f6cc57"
+              />
+            }
           </span>
 
-          <span className="directory-name truncate">
+          <span className="directory-name truncate text-sm text-gray-700">
             {node.name}
           </span>
         </div>
@@ -271,8 +296,10 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
               type="text"
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder={`Enter ${newFolderType} name`}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              autoFocus
             />
           </div>
 

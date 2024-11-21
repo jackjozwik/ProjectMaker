@@ -69,7 +69,7 @@ function App() {
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-      <Split
+        <Split
           sizes={splitSizes} //%'s of the container ex 40% left, 60% right
           minSize={[300, 400]}  // Minimum sizes for each panel
           maxSize={[500, Infinity]}  // Maximum sizes - allows right panel to grow
@@ -78,7 +78,7 @@ function App() {
           snapOffset={30}
           dragInterval={1}
           className="split flex h-full"
-          style={{ display: 'flex' }} 
+          style={{ display: 'flex' }}
           onDragEnd={(sizes) => setSplitSizes(sizes)} // Save sizes when drag ends
         >
           {/* Settings Panel */}
@@ -116,7 +116,7 @@ function App() {
                   placeholder="e.g., NDH"
                   value={artistRef}
                   onChange={actions.handleArtistRefChange}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 uppercase"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900"
                   maxLength={3}
                 />
                 {validationErrors.artistRef && (
@@ -134,7 +134,7 @@ function App() {
                   placeholder="e.g., CPS"
                   value={projectRef}
                   onChange={actions.handleProjectRefChange}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 uppercase"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900"
                   maxLength={3}
                 />
                 {validationErrors.projectRef && (
@@ -207,6 +207,12 @@ function App() {
           <div className="bg-white overflow-y-auto">
             <div className="p-4">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Directory Structure</h2>
+
+              <div className="mb-4">
+                <p className="text-sm text-gray-500 break-all font-mono">
+                  {basePath}
+                </p>
+              </div>
 
               <Sidebar
                 showSidebar={true}
