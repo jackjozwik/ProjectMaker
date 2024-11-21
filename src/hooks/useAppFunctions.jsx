@@ -22,6 +22,12 @@ const useAppFunctions = () => {
   const [lastRefresh, setLastRefresh] = useState(Date.now());
   const refreshTimeoutRef = useRef(null);
 
+  const normalizePath = useCallback((path) => {
+    if (!path) return '';
+    // Replace backslashes with forward slashes and remove trailing slash
+    return path.replace(/\\/g, '/').replace(/\/$/, '');
+  }, []);
+
   // Only update the loadDirectoryStructure function in useAppFunctions.jsx
   // Enhanced loadDirectoryStructure with debouncing
   const loadDirectoryStructure = useCallback(async (force = false) => {
@@ -34,7 +40,7 @@ const useAppFunctions = () => {
       }
 
       const structure = await invoke('get_directory_structure', {
-        path: basePath
+        path: normalizePath(basePath)
       });
 
       setDirectoryStructure(structure);
@@ -43,7 +49,7 @@ const useAppFunctions = () => {
       console.error('Failed to load directory structure:', error);
       setToastMessage('Failed to load directory structure');
     }
-  }, [basePath, lastRefresh]);
+  }, [basePath, lastRefresh, normalizePath]);
 
 
   // Refresh after actions (with debouncing)
@@ -105,6 +111,7 @@ const useAppFunctions = () => {
     }
   }, [validateInputs, createProject, refreshAfterAction]);
 
+  // Update basePath handling
   const handleBasePathSelect = useCallback(async () => {
     try {
       const selected = await open({
@@ -112,12 +119,14 @@ const useAppFunctions = () => {
         multiple: false,
       });
       if (selected) {
-        setBasePath(selected);
+        const normalizedPath = normalizePath(selected);
+        setBasePath(normalizedPath);
+        localStorage.setItem('lastBasePath', normalizedPath);
       }
     } catch (err) {
       console.error('Failed to select directory:', err);
     }
-  }, []);
+  }, [normalizePath]);
 
   const toggleNode = useCallback((path) => {
     setExpandedNodes(prev => {
@@ -155,6 +164,14 @@ const useAppFunctions = () => {
     if (basePath) localStorage.setItem('lastBasePath', basePath);
   }, [basePath]);
 
+  useEffect(() => {
+    // Normalize basePath when loading from localStorage
+    const storedPath = localStorage.getItem('lastBasePath');
+    if (storedPath) {
+      setBasePath(normalizePath(storedPath));
+    }
+  }, [normalizePath]);
+
   return {
     state: {
       artistRef,
@@ -178,8 +195,9 @@ const useAppFunctions = () => {
       handleBasePathSelect,
       handleCreateProject,
       toggleNode,
-      refreshDirectoryStructure: () => loadDirectoryStructure(true), // Add this
-      refreshAfterAction,  // Add this
+      refreshDirectoryStructure: () => loadDirectoryStructure(true),
+      refreshAfterAction,
+      normalizePath
     }
   };
 };

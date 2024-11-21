@@ -53,7 +53,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
   const createFolders = async () => {
     try {
       setIsLoading(true);
-      const projectPath = node.path;
+      const projectPath = node.path.replace(/\\/g, '/').replace(/\/$/, '');
 
       // Define complete folder structures for each type
       const getFolderStructure = (type, name) => {
@@ -174,24 +174,26 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
 
       // Create each folder
       for (const folder of foldersToCreate) {
-        const fullFolderPath = `${projectPath}/${folder}`;
-
+        // Normalize the path joining
+        const fullFolderPath = `${projectPath}/${folder}`
+            .replace(/\\/g, '/')  // Convert backslashes to forward slashes
+            .replace(/\/+/g, '/'); // Remove any double slashes
+        
         try {
-          await invoke('debug_log', {
-            message: `Creating folder: ${fullFolderPath}`
-          });
-
-          await invoke('create_folder', {
-            path: fullFolderPath,
-            createParents: true
-          });
+            await invoke('debug_log', { 
+                message: `Creating folder: ${fullFolderPath}`
+            });
+            
+            await invoke('create_folder', {
+                path: fullFolderPath,
+                createParents: true
+            });
         } catch (error) {
-          await invoke('debug_log', {
-            message: `Error creating folder ${fullFolderPath}: ${error}`
-          });
-          // Continue with other folders even if one fails
+            await invoke('debug_log', { 
+                message: `Error creating folder ${fullFolderPath}: ${error}`
+            });
         }
-      }
+    }
 
       setIsDialogOpen(false);
       if (onRefresh) {

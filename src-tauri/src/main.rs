@@ -47,13 +47,17 @@ async fn read_template(path: String) -> Result<ProjectTemplate, String> {
 
 #[tauri::command]
 async fn create_project_structure(config: ProjectConfig) -> Result<String, String> {
-    let project_dir = format!("{}{}_{}", 
-        config.base_path,
+    // Normalize the base path
+    let base_path = normalize_path(&config.base_path);
+    let base_path_buf = PathBuf::from(&base_path);
+    
+    let project_dir = format!("{}/{}_{}",
+        base_path,
         config.artist_ref,
         config.project_ref
     );
+    let project_path_buf = PathBuf::from(&project_dir);
 
-    let base_path = PathBuf::from(&project_dir);
 
     // Get directories from template if provided, otherwise use defaults
     let directories = if let Some(ref template_path) = config.template_path {
@@ -90,7 +94,7 @@ async fn create_project_structure(config: ProjectConfig) -> Result<String, Strin
 
     // Create directories
     for dir in directories {
-        let path = base_path.join(dir);
+        let path = project_path_buf.join(dir);
         fs::create_dir_all(&path).map_err(|e| e.to_string())?;
     }
 
@@ -99,7 +103,7 @@ async fn create_project_structure(config: ProjectConfig) -> Result<String, Strin
         let template = read_template(template_path.to_string()).await?;
         for file in template.base_files {
             let source = PathBuf::from(file.source);
-            let destination = base_path.join(file.destination);
+            let destination = project_path_buf.join(file.destination);
 
             // Ensure parent directory exists
             if let Some(parent) = destination.parent() {
@@ -121,7 +125,8 @@ async fn create_project_structure(config: ProjectConfig) -> Result<String, Strin
 #[tauri::command]
 async fn get_directory_structure(path: String) -> Result<DirEntry, String> {
     println!("Reading directory: {}", path);
-    read_dir_recursive(&PathBuf::from(path))
+    let normalized_path = normalize_path(&path);
+    read_dir_recursive(&PathBuf::from(normalized_path))
         .map_err(|e| e.to_string())
 }
 
@@ -169,13 +174,26 @@ fn read_dir_recursive(path: &PathBuf) -> Result<DirEntry, std::io::Error> {
     }
 }
 
+fn normalize_path(path: &str) -> String {
+    let path_buf = PathBuf::from(path);
+    path_buf.to_string_lossy()
+        .replace("\\", "/")
+        .trim_end_matches('/')
+        .to_string()
+}
+
 #[tauri::command]
 async fn create_folder(path: String, create_parents: bool) -> Result<String, String> {
+
+    let normalized_path = normalize_path(&path);
+    println!("  - Normalized path: {}", normalized_path);
+
+
     println!("Creating folder:");
     println!("  - Full path: {}", path);
     println!("  - Create parents: {}", create_parents);
     
-    let path_buf = PathBuf::from(&path);
+    let path_buf = PathBuf::from(&normalized_path);
     println!("  - Absolute path: {}", path_buf.canonicalize().unwrap_or(path_buf.clone()).display());
     
     if create_parents {
