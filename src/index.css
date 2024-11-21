@@ -32,6 +32,27 @@ code {
 .gutter.gutter-horizontal {
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
   cursor: col-resize;
+  width: 8px; /* Make gutter slightly wider */
+}
+
+.split {
+  display: flex;
+  flex-direction: row;
+}
+
+/* Ensure panels take full height */
+.split > * {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Optional: Add some min-width to prevent panels from getting too small */
+.split > :first-child {
+  min-width: 200px;
+}
+
+.split > :last-child {
+  min-width: 400px;
 }
 
 /* Directory tree styles */

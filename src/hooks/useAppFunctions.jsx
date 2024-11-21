@@ -69,14 +69,21 @@ const useAppFunctions = () => {
   // Validation function
   const validateInputs = useCallback(() => {
     const errors = {};
-    if (projectRef.length !== 3) {
-      errors.projectRef = 'Project reference must be exactly 3 characters';
+
+    // Regex for alphanumeric validation (letters and numbers)
+    const alphanumericRegex = /^[A-Z0-9]{3}$/;
+
+    if (!alphanumericRegex.test(projectRef.toUpperCase())) {
+      errors.projectRef = 'Project code must be exactly 3 alphanumeric characters';
     }
-    if (artistRef.length !== 3) {
-      errors.artistRef = 'Artist reference must be exactly 3 characters';
+
+    if (!alphanumericRegex.test(artistRef.toUpperCase())) {
+      errors.artistRef = 'Artist code must be exactly 3 alphanumeric characters';
     }
+
     return errors;
   }, [projectRef, artistRef]);
+
 
   // Project creation
   const createProject = useCallback(async (templatePath = null) => {
@@ -140,6 +147,32 @@ const useAppFunctions = () => {
     });
   }, []);
 
+  // Modify the input handlers to enforce uppercase and allow numbers
+  const handleArtistRefChange = useCallback((e) => {
+    // Allow only letters, numbers
+    const value = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (value.length <= 3) {
+      setArtistRef(value);
+
+      //Clear valdiation errors
+      if (/^[A-Z0-9]{3}$/.test(value)) {
+        setValidationErrors(prev => ({ ...prev, artistRef: undefined }));
+      }
+    }
+  }, []);
+
+  const handleProjectRefChange = useCallback((e) => {
+    // Allow only letters, numbers
+    const value = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (value.length <= 3) {
+      setProjectRef(value);
+      if (/^[A-Z0-9]{3}$/.test(value)) {
+        setValidationErrors(prev => ({ ...prev, projectRef: undefined }));
+      }
+    }
+  }, []);
+
+
   //Use Effects
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -197,7 +230,9 @@ const useAppFunctions = () => {
       toggleNode,
       refreshDirectoryStructure: () => loadDirectoryStructure(true),
       refreshAfterAction,
-      normalizePath
+      normalizePath,
+      handleArtistRefChange,
+      handleProjectRefChange
     }
   };
 };

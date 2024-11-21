@@ -28,7 +28,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
   const fullPath = path ? `${path}/${node.name}` : node.name;
   const isExpanded = expandedNodes.has(fullPath);
   const hasChildren = node.children && node.children.length > 0;
-  const isProjectFolder = /^[A-Z]{3}_[A-Z]{3}$/.test(node.name);
+  const isProjectFolder = /^[A-Z0-9]{3}_[A-Z0-9]{3}$/.test(node.name);
 
 
   const handleContextMenu = (e) => {
@@ -218,7 +218,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, ba
           </span>
 
           <span className="directory-icon">
-            {hasChildren ? '📁' : '📄'}
+            {hasChildren ? '📁' : '📁'}
           </span>
 
           <span className="directory-name truncate">

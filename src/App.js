@@ -26,6 +26,7 @@ function App() {
   // Template state
   const [templatePath, setTemplatePath] = useState(null);
   const [templatePreview, setTemplatePreview] = useState(null);
+  const [splitSizes, setSplitSizes] = useState([40, 60]);
 
   const handleTemplateSelect = async () => {
     try {
@@ -68,17 +69,20 @@ function App() {
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden">
-        <Split
-          sizes={[30, 70]}
-          minSize={[300, 500]}
+      <Split
+          sizes={splitSizes} //%'s of the container ex 40% left, 60% right
+          minSize={[300, 400]}  // Minimum sizes for each panel
+          maxSize={[500, Infinity]}  // Maximum sizes - allows right panel to grow
           expandToMin={false}
           gutterSize={8}
           snapOffset={30}
           dragInterval={1}
           className="split flex h-full"
+          style={{ display: 'flex' }} 
+          onDragEnd={(sizes) => setSplitSizes(sizes)} // Save sizes when drag ends
         >
           {/* Settings Panel */}
-          <div className="bg-white border-r border-gray-200 overflow-y-auto">
+          <div className="bg-white border-r border-gray-200 overflow-y-auto min-w-[300px]">
             <div className="p-4 space-y-6">
               {/* Base Path */}
               <div>
@@ -111,10 +115,13 @@ function App() {
                   type="text"
                   placeholder="e.g., NDH"
                   value={artistRef}
-                  onChange={(e) => actions.setArtistRef(e.target.value.toUpperCase())}
+                  onChange={actions.handleArtistRefChange}
                   className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 uppercase"
                   maxLength={3}
                 />
+                {validationErrors.artistRef && (
+                  <p className="mt-1 text-xs text-red-500">{validationErrors.artistRef}</p>
+                )}
               </div>
 
               {/* Project Code */}
@@ -126,7 +133,7 @@ function App() {
                   type="text"
                   placeholder="e.g., CPS"
                   value={projectRef}
-                  onChange={(e) => actions.setProjectRef(e.target.value.toUpperCase())}
+                  onChange={actions.handleProjectRefChange}
                   className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 uppercase"
                   maxLength={3}
                 />
@@ -200,7 +207,7 @@ function App() {
           <div className="bg-white overflow-y-auto">
             <div className="p-4">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Directory Structure</h2>
-              
+
               <Sidebar
                 showSidebar={true}
                 directoryStructure={directoryStructure}

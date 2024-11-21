@@ -63,10 +63,11 @@
     "windows": [
       {
         "fullscreen": false,
+        "center": true,
         "height": 600,
+        "width": 900,
         "resizable": true,
-        "title": "project-maker",
-        "width": 800
+        "title": "Project Maker"
       }
     ]
   }

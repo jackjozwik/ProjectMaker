@@ -146,7 +146,11 @@ fn read_dir_recursive(path: &PathBuf) -> Result<DirEntry, std::io::Error> {
             let child_path = entry.path();
             println!("Found child: {}", child_path.display());
             
-            children.push(read_dir_recursive(&child_path)?);
+            // Only process directories
+            if entry.metadata()?.is_dir() {
+                println!("Found directory: {}", child_path.display());
+                children.push(read_dir_recursive(&child_path)?);
+            }
         }
         
         // Sort children (directories first, then alphabetically)
