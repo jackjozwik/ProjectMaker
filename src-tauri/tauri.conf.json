@@ -22,6 +22,12 @@
         "close": true,
         "startDragging": true
       },
+      "shell": {
+        "open": true
+      },
+      "clipboard": {
+        "writeText": true
+      },
       "fs": {
         "all": true,
         "readDir": true,
@@ -45,8 +51,8 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
-      "longDescription": "",
+      "identifier": "com.project-maker.dev",
+      "longDescription": "CA/VFX/DC Project Directory Structure Manager",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
@@ -55,12 +61,20 @@
         "signingIdentity": null
       },
       "resources": [],
-      "shortDescription": "",
-      "targets": "all",
+      "shortDescription": "Project Directory Manager",
+      "targets": ["msi", "nsis"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
-        "timestampUrl": ""
+        "timestampUrl": "",
+        "wix": {
+          "language": ["en-US"]
+        },
+        "nsis": {
+          "installMode": "currentUser",
+          "license": null,
+          "template": null
+        }
       }
     },
     "security": {

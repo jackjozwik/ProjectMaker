@@ -56,15 +56,16 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
 
 
 
+
   const handleContextMenu = (e) => {
     e.preventDefault();
-    if (isProjectFolder) {
-      setContextMenu({
-        x: e.clientX,
-        y: e.clientY,
-        path: fullPath
-      });
-    }
+    // Pass the full path for the selected node
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      path: node.path || fullPath, // Use node.path if available, fallback to fullPath
+      isProjectFolder: isProjectFolder
+    });
   };
 
 
@@ -329,9 +330,10 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
         <ContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
+          path={contextMenu.path}
+          isProjectFolder={contextMenu.isProjectFolder}
           onClose={() => setContextMenu(null)}
           onSelect={handleMenuSelect}
-          isProjectFolder={isProjectFolder}
         />
       )}
 
@@ -385,7 +387,7 @@ const Sidebar = ({ showSidebar, directoryStructure, expandedNodes, onToggleNode,
 
   return (
     <div className="bg-white dark:bg-gray-800 dark:border-gray-700 border-l border-gray-200 overflow-y-auto">
-      
+
       <div className="p-4 dark:bg-gray-800 dark:border-gray-700">
         {directoryStructure && (
           <DirectoryTree

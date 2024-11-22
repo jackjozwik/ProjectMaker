@@ -1,7 +1,7 @@
 // src/components/TitleBar.jsx
 import React from 'react';
 import { appWindow } from '@tauri-apps/api/window';
-import { Minus, X, Square, SquareStack } from 'lucide-react';
+import { Minus, X, Square, SquareStack, Copy } from 'lucide-react';
 
 const TitleBar = ({ isDarkMode }) => {
     const [isMaximized, setIsMaximized] = React.useState(false);
@@ -54,7 +54,7 @@ const TitleBar = ({ isDarkMode }) => {
                 >
 
                     {isMaximized ? (
-                        <SquareStack
+                        <Copy
                             size={14}
                             className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}
                         />

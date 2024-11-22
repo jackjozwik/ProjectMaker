@@ -2,6 +2,9 @@
 use std::fs;
 use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
+use tauri::Manager; // This gives us access to the window API
+use std::process::Command;
+
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ProjectConfig {
@@ -49,7 +52,7 @@ async fn read_template(path: String) -> Result<ProjectTemplate, String> {
 async fn create_project_structure(config: ProjectConfig) -> Result<String, String> {
     // Normalize the base path
     let base_path = normalize_path(&config.base_path);
-    let base_path_buf = PathBuf::from(&base_path);
+    
     
     let project_dir = format!("{}/{}_{}",
         base_path,
@@ -225,6 +228,45 @@ async fn create_folder(path: String, create_parents: bool) -> Result<String, Str
 }
 
 #[tauri::command]
+async fn copy_to_clipboard(text: String) -> Result<(), String> {
+    let mut clipboard = arboard::Clipboard::new()
+        .map_err(|e| format!("Failed to access clipboard: {}", e))?;
+    
+    clipboard.set_text(text)
+        .map_err(|e| format!("Failed to copy text: {}", e))?;
+    
+    Ok(())
+}
+
+#[tauri::command]
+async fn open_in_explorer(path: String) -> Result<(), String> {
+    // Platform-specific commands
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("explorer")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| format!("Failed to open explorer: {}", e))?;
+    }
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| format!("Failed to open finder: {}", e))?;
+    }
+    #[cfg(target_os = "linux")]
+    {
+        Command::new("xdg-open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| format!("Failed to open file manager: {}", e))?;
+    }
+    
+    Ok(())
+}
+
+#[tauri::command]
 async fn debug_log(message: String) {
     println!("Debug: {}", message);
 }
@@ -236,7 +278,9 @@ fn main() {
             get_directory_structure,
             read_template,
             create_folder,
-            debug_log  
+            debug_log,
+            copy_to_clipboard, 
+            open_in_explorer
 
         ])
         .run(tauri::generate_context!())

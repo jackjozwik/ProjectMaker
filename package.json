@@ -2,6 +2,9 @@
   "name": "project-maker",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
+  "author": "Jack Jozwik",
+  "description": "CA/VFX/DC Project Directory Structure Manager",
   "dependencies": {
     "@tauri-apps/api": "^1.6.0",
     "@testing-library/jest-dom": "^5.17.0",
