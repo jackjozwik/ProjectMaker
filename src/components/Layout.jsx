@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, ChevronDown, Folder, FolderOpen } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './Dialog';
 import ContextMenu from './ContextMenu';
@@ -16,19 +16,44 @@ const SidebarToggle = ({ showSidebar, onToggle }) => (
 
 // DirectoryTree component
 // Update only the DirectoryTree component in Layout.jsx
-const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, setToastMessage, basePath }) => {
+const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, setToastMessage, basePath, selectedFolder, setSelectedFolder, setMenuHandler }) => {
   const [contextMenu, setContextMenu] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newFolderType, setNewFolderType] = useState(null);
   const [newFolderName, setNewFolderName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+
+  const handleMenuSelect = useCallback((type) => {
+    invoke('debug_log', { message: `Menu select called with type: ${type}` });
+    setNewFolderType(type);
+    setNewFolderName('');
+    setIsDialogOpen(true);
+    setContextMenu(null);
+  }, []);
+
+  // Move these up before the hooks
+  const fullPath = path ? `${path}/${node.name}` : node.name;
+  const isProjectFolder = /^[A-Z]{3}_[A-Z]{3}$/.test(node.name);
+
+  useEffect(() => {
+    // Get the full node path for comparison
+    const nodePath = path ? `${path}/${node.name}` : node.name;
+
+    invoke('debug_log', { message: `Comparing nodePath: ${nodePath} with selectedFolder: ${selectedFolder}` });
+
+    if (node && isProjectFolder && nodePath === selectedFolder) {
+      invoke('debug_log', { message: `Setting menu handler for ${nodePath}` });
+      setMenuHandler(() => handleMenuSelect);
+    }
+  }, [node, selectedFolder, isProjectFolder, handleMenuSelect, setMenuHandler, path]);
+
   if (!node) return null;
 
-  const fullPath = path ? `${path}/${node.name}` : node.name;
   const isExpanded = expandedNodes.has(fullPath);
   const hasChildren = node.children && node.children.length > 0;
-  const isProjectFolder = /^[A-Z]{3}_[A-Z]{3}$/.test(node.name);
+  const isSelected = selectedFolder === fullPath;
+
 
 
   const handleContextMenu = (e) => {
@@ -42,12 +67,6 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
     }
   };
 
-  const handleMenuSelect = (type) => {
-    setNewFolderType(type);
-    setNewFolderName('');
-    setIsDialogOpen(true);
-    setContextMenu(null);
-  };
 
   // In the DirectoryTree component:
   const createFolders = async () => {
@@ -203,7 +222,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
         'shot': `Shot "${newFolderName}" created in ${projectFolderName}`
       };
 
-      
+
       if (onRefresh) {
         await onRefresh();
       }
@@ -221,14 +240,28 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
     if (e.key === 'Enter' && newFolderName && !isLoading) {
       createFolders();
     }
+    if (e.key === 'Escape') {
+      setIsDialogOpen(false);
+    }
+  };
+
+  const handleClick = async (e) => {
+    if (hasChildren) {
+      onToggle(fullPath);
+    }
+    if (isProjectFolder) {
+      await invoke('debug_log', { message: `Selected folder: ${fullPath}` });
+      setSelectedFolder(fullPath);
+    }
   };
 
   return (
     <div className="directory-tree" onContextMenu={handleContextMenu}>
       {node.name && (
         <div
-          className="directory-item px-2 py-1 hover:bg-gray-100 rounded cursor-pointer flex items-center gap-1.5"
-          onClick={() => hasChildren && onToggle(fullPath)}
+          className={`directory-item px-2 py-1 rounded cursor-pointer flex items-center gap-1.5 transition-colors ${isSelected ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-100'
+            }`}
+          onClick={handleClick}
         >
           <span className="directory-icon flex items-center justify-center w-4 h-4 text-gray-400">
             {hasChildren && (
@@ -279,7 +312,11 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
                 onToggle={onToggle}
                 expandedNodes={expandedNodes}
                 onRefresh={onRefresh}
-                setToastMessage={setToastMessage}  // Add this prop
+                setToastMessage={setToastMessage}
+                selectedFolder={selectedFolder}      // Add this
+                setSelectedFolder={setSelectedFolder}// Add this
+                setMenuHandler={setMenuHandler}      // Add this
+                basePath={basePath}
               />
             ))}
         </div>
@@ -339,7 +376,8 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
 
 
 // Sidebar component
-const Sidebar = ({ showSidebar, directoryStructure, expandedNodes, onToggleNode, onRefresh, setToastMessage, basePath }) => {
+const Sidebar = ({ showSidebar, directoryStructure, expandedNodes, onToggleNode, onRefresh, setToastMessage, basePath, selectedFolder,
+  setSelectedFolder, onMenuSelect, setMenuHandler }) => {
   if (!showSidebar) return null;
 
   return (
@@ -353,6 +391,11 @@ const Sidebar = ({ showSidebar, directoryStructure, expandedNodes, onToggleNode,
             onRefresh={onRefresh}
             basePath={basePath}  // Pass basePath to DirectoryTree
             setToastMessage={setToastMessage}  // Add this prop
+            selectedFolder={selectedFolder}
+            setSelectedFolder={setSelectedFolder}
+            onMenuSelect={onMenuSelect}
+            setMenuHandler={setMenuHandler}  // Pass this through
+
           />
         )}
       </div>

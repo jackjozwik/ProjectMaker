@@ -21,6 +21,8 @@ const useAppFunctions = () => {
   // Add a debounced refresh timestamp
   const [lastRefresh, setLastRefresh] = useState(Date.now());
   const refreshTimeoutRef = useRef(null);
+  const [selectedFolder, setSelectedFolder] = useState(null);
+
 
   const normalizePath = useCallback((path) => {
     if (!path) return '';
@@ -170,7 +172,6 @@ const useAppFunctions = () => {
     }
   }, []);
 
-
   //Use Effects
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -214,7 +215,8 @@ const useAppFunctions = () => {
       expandedNodes,
       isProjectFolder,
       showSidebar,
-      toastMessage
+      toastMessage,
+      selectedFolder
     },
     actions: {
       setArtistRef,
@@ -230,7 +232,8 @@ const useAppFunctions = () => {
       refreshAfterAction,
       normalizePath,
       handleArtistRefChange,
-      handleProjectRefChange
+      handleProjectRefChange,
+      setSelectedFolder,
     }
   };
 };

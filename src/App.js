@@ -7,6 +7,7 @@ import { SidebarToggle, Sidebar } from './components/Layout.jsx';
 import useAppFunctions from './hooks/useAppFunctions.jsx';
 import { useState } from 'react';
 import { FolderPlus } from 'lucide-react';
+import ActionButtons from './components/ActionButtons';
 
 function App() {
   const { state, actions } = useAppFunctions();
@@ -27,6 +28,17 @@ function App() {
   const [templatePath, setTemplatePath] = useState(null);
   const [templatePreview, setTemplatePreview] = useState(null);
   const [splitSizes, setSplitSizes] = useState([40, 60]);
+  const [menuHandler, setMenuHandler] = useState(null);
+  const [activeMenuHandler, setActiveMenuHandler] = useState(null);
+
+  const handleMenuAction = async (type) => {
+    await invoke('debug_log', { message: `Action button clicked with type: ${type}` });
+    await invoke('debug_log', { message: `Active handler exists: ${!!activeMenuHandler}` });
+
+    if (activeMenuHandler) {
+      activeMenuHandler(type);
+    }
+  };
 
   const handleTemplateSelect = async () => {
     try {
@@ -199,6 +211,25 @@ function App() {
                 >
                   {isLoading ? 'Creating...' : 'Create Project Structure'}
                 </button>
+
+                {/* Add a divider when buttons are visible */}
+                {state.selectedFolder && (
+                  <>
+                    <div className="relative py-2">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-500">Quick Actions</span>
+                      </div>
+                    </div>
+
+                    <ActionButtons
+                      selectedFolder={state.selectedFolder}
+                      onAction={handleMenuAction}
+                    />
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -222,7 +253,11 @@ function App() {
                 onRefresh={actions.refreshAfterAction}
                 basePath={basePath}
                 setToastMessage={actions.setToastMessage}  // Add this prop
+                selectedFolder={state.selectedFolder}
+                setSelectedFolder={actions.setSelectedFolder}
+                setMenuHandler={setActiveMenuHandler}
               />
+
             </div>
           </div>
         </Split>
