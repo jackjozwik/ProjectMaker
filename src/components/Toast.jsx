@@ -22,7 +22,7 @@ const Toast = ({ message, onClose, type = 'success', duration = 3000 }) => {
       } ${
         type === 'error'
           ? 'bg-red-50 text-red-700 border border-red-200'
-          : 'bg-green-50 text-green-700 border border-green-200'
+          : 'bg-green-50 text-green-700 border border-green-200 dark:bg-emerald-900/90 dark:text-emerald-100 dark:border-emerald-700/50'
       }`}
     >
       <span>{message}</span>

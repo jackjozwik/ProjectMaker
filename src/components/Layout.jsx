@@ -261,7 +261,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
         <div
           className={`directory-item px-2 py-1 rounded cursor-pointer flex items-center gap-1.5 transition-colors
           ${isSelected ?
-              'bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-800/40' :
+              'bg-blue-100 dark:bg-emerald-900/20 dark:border-l-2 hover:bg-blue-200 dark:hover:bg-emerald-800/40 dark:border-emerald-600' :
               'hover:bg-gray-100 dark:hover:bg-gray-700/50'
             }`}
           onClick={handleClick}
@@ -350,7 +350,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
               onChange={(e) => setNewFolderName(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={`Enter ${newFolderType === 'asset' ? 'asset' : newFolderType === 'rnd' ? 'R&D' : 'shot'} name`}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-gray-400"
               autoFocus
             />
           </div>
@@ -358,14 +358,14 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
           <DialogFooter>
             <button
               onClick={() => setIsDialogOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-gray-400"
             >
               Cancel
             </button>
             <button
               onClick={createFolders}
               disabled={!newFolderName || isLoading}
-              className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${(!newFolderName || isLoading) ? 'opacity-50 cursor-not-allowed' : ''
+              className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none  dark:bg-emerald-600 hover:bg-blue-700 dark:hover:bg-emerald-700 ${(!newFolderName || isLoading) ? 'opacity-50 cursor-not-allowed dark:bg-emerald-600 hover:bg-blue-700 dark:hover:bg-emerald-700' : ''
                 }`}
             >
               {isLoading ? 'Creating...' : 'Create'}

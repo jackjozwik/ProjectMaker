@@ -58,11 +58,12 @@ code {
 /* Dark mode split panel styles */
 .dark .split {
   .gutter {
-    background-color: #374151;
+    /* color for resizer */
+    background-color: #2f2f2f;
   }
 
   .gutter:hover {
-    background-color: #4b5563;
+    background-color: #404040;
   }
 }
 
@@ -70,12 +71,22 @@ code {
 :root {
   --scrollbar-thumb: #d1d5db;
   --scrollbar-track: #f3f4f6;
+  --text-primary: #1a1a1a;
+  --text-secondary: #666666;
+  --bg-sidepanel: #ffffff;
+  --bg-content: #f8f8f8;
+  --bg-input: #f3f3f3;
 }
 
 /* Dark mode variables */
 html.dark {
-  --scrollbar-thumb: #4b5563;
-  --scrollbar-track: #1f2937;
+  --scrollbar-thumb: #3f3f3f;
+  --scrollbar-track: #282828;
+  --text-primary: #ececec;
+  --text-secondary: rgb(155, 155, 155);
+  --bg-sidepanel: #171717;
+  --bg-content: #212121;
+  --bg-input: #2f2f2f;
 }
 
 /* Webkit Scrollbars */
