@@ -256,14 +256,17 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
   };
 
   return (
-    <div className="directory-tree" onContextMenu={handleContextMenu}>
+    <div className="directory-tree dark:bg-gray-800 dark:border-gray-700" onContextMenu={handleContextMenu}>
       {node.name && (
         <div
-          className={`directory-item px-2 py-1 rounded cursor-pointer flex items-center gap-1.5 transition-colors ${isSelected ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-100'
+          className={`directory-item px-2 py-1 rounded cursor-pointer flex items-center gap-1.5 transition-colors
+          ${isSelected ?
+              'bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-800/40' :
+              'hover:bg-gray-100 dark:hover:bg-gray-700/50'
             }`}
           onClick={handleClick}
         >
-          <span className="directory-icon flex items-center justify-center w-4 h-4 text-gray-400">
+          <span className="directory-icon flex items-center justify-center w-4 h-4 text-gray-400 dark:text-gray-500">
             {hasChildren && (
               isExpanded ?
                 <ChevronDown size={16} className="shrink-0" /> :
@@ -290,7 +293,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
             }
           </span>
 
-          <span className="directory-name truncate text-sm text-gray-700">
+          <span className="directory-name truncate text-sm text-gray-700 dark:text-gray-200">
             {node.name}
           </span>
         </div>
@@ -381,8 +384,9 @@ const Sidebar = ({ showSidebar, directoryStructure, expandedNodes, onToggleNode,
   if (!showSidebar) return null;
 
   return (
-    <div className="bg-white border-l border-gray-200 overflow-y-auto">
-      <div className="p-4">
+    <div className="bg-white dark:bg-gray-800 dark:border-gray-700 border-l border-gray-200 overflow-y-auto">
+      
+      <div className="p-4 dark:bg-gray-800 dark:border-gray-700">
         {directoryStructure && (
           <DirectoryTree
             node={directoryStructure}

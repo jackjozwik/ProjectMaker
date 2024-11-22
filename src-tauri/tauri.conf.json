@@ -15,10 +15,19 @@
       "dialog": {
         "all": true
       },
+      "window": {
+        "maximize": true,
+        "unmaximize": true,
+        "minimize": true,
+        "close": true,
+        "startDragging": true
+      },
       "fs": {
         "all": true,
         "readDir": true,
-        "scope": ["**"]
+        "scope": [
+          "**"
+        ]
       }
     },
     "bundle": {
@@ -64,10 +73,12 @@
       {
         "fullscreen": false,
         "center": true,
-        "height": 600,
+        "height": 625,
         "width": 900,
         "resizable": true,
-        "title": "Project Maker"
+        "title": "Project Maker",
+        "decorations": false,
+        "transparent": true
       }
     ]
   }

@@ -1,0 +1,26 @@
+{
+    "name": "Custom VFX Template",
+    "description": "Custom directory structure for VFX projects",
+    "directories": [
+        "01_Client_Brief",
+        "02_References",
+        "03_Assets/Characters",
+        "03_Assets/Props",
+        "03_Assets/Environments",
+        "04_Working/Maya",
+        "04_Working/Houdini",
+        "04_Working/Nuke",
+        "05_Renders",
+        "06_Deliverables"
+    ],
+    "base_files": [
+        {
+            "source": "Z:/Templates/maya/default_scene.ma",
+            "destination": "04_Working/Maya/default_scene.ma"
+        },
+        {
+            "source": "Z:/Templates/nuke/default_comp.nk",
+            "destination": "04_Working/Nuke/default_comp.nk"
+        }
+    ]
+}

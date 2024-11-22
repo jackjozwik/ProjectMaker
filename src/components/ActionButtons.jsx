@@ -20,9 +20,14 @@ const ActionButtons = ({ selectedFolder, onAction }) => {
           key={type}
           onClick={() => onAction(type)}
           className="px-3 py-2 text-sm font-medium transition-colors
-            text-gray-700 bg-gray-100 hover:bg-gray-200
-            border border-gray-200 rounded-md shadow-sm
-            focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400"
+            text-gray-700 dark:text-gray-200 
+            bg-gray-100 dark:bg-gray-800 
+            hover:bg-gray-200 dark:hover:bg-gray-700
+            border border-gray-200 dark:border-gray-700 
+            rounded-md shadow-sm
+            focus:outline-none focus:ring-2 focus:ring-offset-1 
+            focus:ring-gray-400 dark:focus:ring-gray-500
+            dark:focus:ring-offset-gray-900"
         >
           {label}
         </button>

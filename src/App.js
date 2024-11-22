@@ -5,9 +5,11 @@ import './index.css';
 import Toast from './components/Toast';
 import { SidebarToggle, Sidebar } from './components/Layout.jsx';
 import useAppFunctions from './hooks/useAppFunctions.jsx';
-import { useState } from 'react';
-import { FolderPlus } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileText, FolderPlus } from 'lucide-react';
 import ActionButtons from './components/ActionButtons';
+import { Moon, Sun } from 'lucide-react';
+import TitleBar from './components/TitleBar';
 
 function App() {
   const { state, actions } = useAppFunctions();
@@ -30,6 +32,15 @@ function App() {
   const [splitSizes, setSplitSizes] = useState([40, 60]);
   const [menuHandler, setMenuHandler] = useState(null);
   const [activeMenuHandler, setActiveMenuHandler] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(() =>
+    localStorage.getItem('darkMode') === 'true'
+  );
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDarkMode);
+    localStorage.setItem('darkMode', isDarkMode);
+  }, [isDarkMode]);
+
 
   const handleMenuAction = async (type) => {
     await invoke('debug_log', { message: `Action button clicked with type: ${type}` });
@@ -61,12 +72,26 @@ function App() {
   };
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
+      <TitleBar isDarkMode={isDarkMode} />
+
       {/* Header Bar */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center gap-3">
-          {/* <FolderPlus className="w-6 h-6 text-blue-600" /> */}
-          <h1 className="text-lg font-semibold text-gray-900">Project Maker</h1>
+      {/* <div className="titlebar bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-3 transition-colors"> */}
+      <div className="pt-8 flex-1 flex flex-col">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Project Maker</h1>
+          </div>
+          <button
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            {isDarkMode ?
+              <Sun className="w-5 h-5 text-gray-500 dark:text-gray-400" /> :
+              <Moon className="w-5 h-5 text-gray-500" />
+            }
+          </button>
         </div>
       </div>
 
@@ -89,16 +114,17 @@ function App() {
           gutterSize={8}
           snapOffset={30}
           dragInterval={1}
-          className="split flex h-full"
+          className="split flex h-full "
           style={{ display: 'flex' }}
           onDragEnd={(sizes) => setSplitSizes(sizes)} // Save sizes when drag ends
         >
           {/* Settings Panel */}
-          <div className="bg-white border-r border-gray-200 overflow-y-auto min-w-[300px]">
+          <div className="bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
+
             <div className="p-4 space-y-6">
               {/* Base Path */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">
                   Base Path
                 </label>
                 <div className="flex gap-2">
@@ -107,11 +133,12 @@ function App() {
                     placeholder="e.g., C:/Projects/"
                     value={basePath}
                     onChange={(e) => actions.setBasePath(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900"
+                    // className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900"
+                    className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
                   />
                   <button
                     onClick={actions.handleBasePathSelect}
-                    className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md border border-gray-300 hover:bg-gray-200"
+                    className="px-3 py-2 bg-gray-100 text-gray-700 rounded-md border border-gray-300 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-700"
                   >
                     Browse
                   </button>
@@ -120,7 +147,7 @@ function App() {
 
               {/* Artist Code */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">
                   Artist Code
                 </label>
                 <input
@@ -128,7 +155,7 @@ function App() {
                   placeholder="e.g., NDH"
                   value={artistRef}
                   onChange={actions.handleArtistRefChange}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400 dark:focus:border-blue-400"
                   maxLength={3}
                 />
                 {validationErrors.artistRef && (
@@ -138,7 +165,7 @@ function App() {
 
               {/* Project Code */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">
                   Project Code
                 </label>
                 <input
@@ -146,7 +173,7 @@ function App() {
                   placeholder="e.g., CPS"
                   value={projectRef}
                   onChange={actions.handleProjectRefChange}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900"
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400 dark:focus:border-blue-400"
                   maxLength={3}
                 />
                 {validationErrors.projectRef && (
@@ -157,21 +184,23 @@ function App() {
               {/* Template Selection */}
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                     Project Template
                   </label>
                   <button
                     onClick={handleTemplateSelect}
-                    className="text-sm text-blue-600 hover:text-blue-800"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
+    transition-colors duration-150 flex items-center gap-1"
                   >
-                    Browse Template
+                    <FileText className="w-4 h-4" /> Browse Template
                   </button>
                 </div>
 
                 {templatePreview ? (
-                  <div className="mt-2 p-3 bg-gray-50 rounded-md border border-gray-200">
+                  <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-md 
+                  border border-gray-200 dark:border-gray-700">
                     <div className="flex justify-between items-center mb-2">
-                      <h4 className="text-sm font-medium text-gray-700">
+                      <h4 className="text-sm font-medium text-gray-700 hover:text-red-700 dark:text-gray-200 dark:text-red-400 dark:hover:text-red-300">
                         {templatePreview.name}
                       </h4>
                       <button
@@ -184,16 +213,16 @@ function App() {
                         Clear
                       </button>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{templatePreview.description}</p>
+                    <p className="text-sm text-gray-600 mb-2 dark:text-gray-400">{templatePreview.description}</p>
                     <div className="text-xs text-gray-600">
                       <strong>Directories:</strong>
-                      <pre className="mt-1 overflow-auto max-h-32 bg-white p-2 rounded border border-gray-200">
+                      <pre className="mt-1 overflow-auto max-h-32 bg-white p-2 rounded border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                         {templatePreview.directories.join('\n')}
                       </pre>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-500 p-3 bg-gray-50 rounded-md border border-gray-200">
+                  <div className="text-sm text-gray-500 p-3 bg-gray-50 rounded-md border border-gray-200 dark:bg-gray-900/50 dark:border-gray-700 dark:text-gray-400">
                     No template selected (optional)
                   </div>
                 )}
@@ -217,10 +246,12 @@ function App() {
                   <>
                     <div className="relative py-2">
                       <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-200" />
+                        <div className="w-full border-t border-gray-200 dark:border-gray-700" />
                       </div>
                       <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-white text-gray-500">Quick Actions</span>
+                        <span className="px-2 py-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                          Quick Actions
+                        </span>
                       </div>
                     </div>
 
@@ -235,9 +266,10 @@ function App() {
           </div>
 
           {/* Directory View */}
-          <div className="bg-white overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
+
             <div className="p-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Directory Structure</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 dark:text-gray-200">Directory Structure</h2>
 
               <div className="mb-4">
                 <p className="text-sm text-gray-500 break-all font-mono">
@@ -263,6 +295,7 @@ function App() {
         </Split>
       </div>
     </div>
+  </div>
   );
 }
 
