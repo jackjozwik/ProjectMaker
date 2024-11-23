@@ -2,6 +2,7 @@
 import React from 'react';
 import { appWindow } from '@tauri-apps/api/window';
 import { Minus, X, Square, SquareStack, Copy } from 'lucide-react';
+import appIcon from '../assets/icon.png';
 
 const TitleBar = ({ isDarkMode }) => {
     const [isMaximized, setIsMaximized] = React.useState(false);
@@ -26,10 +27,7 @@ const TitleBar = ({ isDarkMode }) => {
         >
             {/* App Title */}
             <div className="flex items-center px-3 py-1">
-                {/* Windows-style app icon */}
-                <div className={`w-4 h-4 mr-2 rounded-sm 
-          ${isDarkMode ? 'bg-blue-500' : 'bg-blue-600'}`}>
-                </div>
+                <img src={appIcon} alt="Project Maker" className="w-4 h-4 mr-2" />
                 <span className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                     Project Maker
                 </span>

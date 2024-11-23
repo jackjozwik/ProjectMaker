@@ -7,7 +7,7 @@
     "distDir": "../build"
   },
   "package": {
-    "productName": "project-maker",
+    "productName": "Project Maker",
     "version": "0.1.0"
   },
   "tauri": {
@@ -31,15 +31,13 @@
       "fs": {
         "all": true,
         "readDir": true,
-        "scope": [
-          "**"
-        ]
+        "scope": ["**"]
       }
     },
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
-      "copyright": "",
+      "copyright": "© 2024 Jack Jozwik",
       "deb": {
         "depends": []
       },
@@ -60,19 +58,23 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": ["icons/*"],
       "shortDescription": "Project Directory Manager",
       "targets": ["msi", "nsis"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
         "timestampUrl": "",
+        "webviewInstallMode": {
+          "type": "downloadBootstrapper"
+        },
         "wix": {
           "language": ["en-US"]
         },
         "nsis": {
           "installMode": "currentUser",
-          "license": null,
+          "displayLanguageSelector": false,
+          "installerIcon": "icons/icon.ico",
           "template": null
         }
       }
@@ -92,7 +94,9 @@
         "resizable": true,
         "title": "Project Maker",
         "decorations": false,
-        "transparent": true
+        "transparent": true,
+        "minHeight": 400,
+        "minWidth": 600
       }
     ]
   }
