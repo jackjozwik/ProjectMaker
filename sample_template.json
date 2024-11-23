@@ -1,0 +1,35 @@
+{
+    "name": "Standard VFX Template",
+    "description": "Default VFX project structure with Maya, Houdini, and Nuke directories",
+    "directories": [
+        "adobe",
+        "Deliveries",
+        "houdini",
+        "maya/assets",
+        "maya/autosave",
+        "maya/cache",
+        "maya/clips",
+        "maya/data",
+        "maya/images",
+        "maya/movies",
+        "maya/renderData",
+        "maya/sceneAssembly",
+        "maya/scenes",
+        "maya/scenes/global",
+        "maya/scripts",
+        "maya/scripts/global",
+        "maya/sound",
+        "maya/sourceImages",
+        "maya/Time Editor",
+        "nuke",
+        "Plates",
+        "Reference",
+        "zbrush"
+    ],
+    "base_files": [
+        {
+            "source": "V:/VFX_resources/base_scene.ma",
+            "destination": "maya/scenes/base_scene.ma"
+        }
+    ]
+}

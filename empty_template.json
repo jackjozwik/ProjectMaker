@@ -1,0 +1,6 @@
+{
+    "name": "Empty Template",
+    "description": "Minimal template with no predefined structure",
+    "directories": [""],
+    "base_files": [""]
+}
