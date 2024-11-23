@@ -2,15 +2,15 @@ import { invoke } from '@tauri-apps/api/tauri';
 import { open } from '@tauri-apps/api/dialog';
 import Split from 'react-split';
 import './index.css';
-import Toast from './components/Toast';
+import Toast from './components/Toast.jsx';
 import { SidebarToggle, Sidebar } from './components/Layout.jsx';
 import useAppFunctions from './hooks/useAppFunctions.jsx';
 import { useState, useEffect } from 'react';
 import { FileText, FolderPlus } from 'lucide-react';
-import ActionButtons from './components/ActionButtons';
+import ActionButtons from './components/ActionButtons.jsx';
 import { Moon, Sun } from 'lucide-react';
-import TitleBar from './components/TitleBar';
-import ThemeToggle from './components/ThemeToggle';
+import TitleBar from './components/TitleBar.jsx';
+import ThemeToggle from './components/ThemeToggle.jsx';
 
 
 function App() {
@@ -131,7 +131,7 @@ function App() {
                       value={basePath}
                       onChange={(e) => actions.setBasePath(e.target.value)}
                       // className="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900"
-                      className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
+                      className="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-gray-400 dark:focus:border-gray-400"
                     />
                     <button
                       onClick={actions.handleBasePathSelect}
@@ -152,7 +152,7 @@ function App() {
                     placeholder="e.g., NDH"
                     value={artistRef}
                     onChange={actions.handleArtistRefChange}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-100 dark:placeholder-gray-400  dark:focus:ring-gray-400 dark:focus:border-gray-400"
                     maxLength={3}
                   />
                   {validationErrors.artistRef && (
@@ -170,7 +170,7 @@ function App() {
                     placeholder="e.g., CPS"
                     value={projectRef}
                     onChange={actions.handleProjectRefChange}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400 dark:focus:border-blue-400"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-gray-400 dark:focus:border-gray-400"
                     maxLength={3}
                   />
                   {validationErrors.projectRef && (
@@ -286,6 +286,7 @@ function App() {
                   selectedFolder={state.selectedFolder}
                   setSelectedFolder={actions.setSelectedFolder}
                   setMenuHandler={setActiveMenuHandler}
+                  isDarkMode={isDarkMode}  // Add this
                 />
 
               </div>

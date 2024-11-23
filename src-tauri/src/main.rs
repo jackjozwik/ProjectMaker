@@ -127,7 +127,7 @@ async fn create_project_structure(config: ProjectConfig) -> Result<String, Strin
 // Keep the original directory reading functionality
 #[tauri::command]
 async fn get_directory_structure(path: String) -> Result<DirEntry, String> {
-    println!("Reading directory: {}", path);
+    // println!("Reading directory: {}", path);
     let normalized_path = normalize_path(&path);
     read_dir_recursive(&PathBuf::from(normalized_path))
         .map_err(|e| e.to_string())
@@ -141,17 +141,17 @@ fn read_dir_recursive(path: &PathBuf) -> Result<DirEntry, std::io::Error> {
         .to_string();
     
     if metadata.is_dir() {
-        println!("Processing directory: {}", path.display());
+        // println!("Processing directory: {}", path.display());
         let mut children = Vec::new();
         
         for entry in fs::read_dir(path)? {
             let entry = entry?;
             let child_path = entry.path();
-            println!("Found child: {}", child_path.display());
+            // println!("Found child: {}", child_path.display());
             
             // Only process directories
             if entry.metadata()?.is_dir() {
-                println!("Found directory: {}", child_path.display());
+                // println!("Found directory: {}", child_path.display());
                 children.push(read_dir_recursive(&child_path)?);
             }
         }
@@ -229,38 +229,94 @@ async fn create_folder(path: String, create_parents: bool) -> Result<String, Str
 
 #[tauri::command]
 async fn copy_to_clipboard(text: String) -> Result<(), String> {
+    println!("Copying to clipboard - Original path: {}", text);
     let mut clipboard = arboard::Clipboard::new()
         .map_err(|e| format!("Failed to access clipboard: {}", e))?;
     
-    clipboard.set_text(text)
+    // Split path into components and remove duplicates
+    let components: Vec<&str> = text.split('/')
+        .filter(|&x| !x.is_empty())
+        .collect();
+    
+    // Build path without duplicates
+    let mut clean_components = Vec::new();
+    for component in components {
+        if clean_components.is_empty() || clean_components.last() != Some(&component) {
+            clean_components.push(component);
+        }
+    }
+    
+    // Reconstruct the path
+    let clean_path = if cfg!(windows) {
+        // Ensure drive letter is formatted correctly with single colon
+        let drive = clean_components[0].trim_end_matches(':');
+        format!("{}:/{}", drive, clean_components[1..].join("/"))
+    } else {
+        format!("/{}", clean_components.join("/"))
+    };
+    
+    println!("Cleaned path for clipboard: {}", clean_path);
+    
+    clipboard.set_text(clean_path)
         .map_err(|e| format!("Failed to copy text: {}", e))?;
     
+    println!("Successfully copied to clipboard");
     Ok(())
 }
 
 #[tauri::command]
 async fn open_in_explorer(path: String) -> Result<(), String> {
-    // Platform-specific commands
+    println!("Opening in explorer - Original path: {}", path);
+    
+    // Split path into components and remove duplicates
+    let components: Vec<&str> = path.split('/')
+        .filter(|&x| !x.is_empty())
+        .collect();
+    
+    // Build path without duplicates
+    let mut clean_components = Vec::new();
+    for component in components {
+        if clean_components.is_empty() || clean_components.last() != Some(&component) {
+            clean_components.push(component);
+        }
+    }
+    
+    // Reconstruct the path
+    let clean_path = if cfg!(windows) {
+        // Fix: Ensure drive letter is formatted correctly with single colon
+        let drive = clean_components[0].trim_end_matches(':'); // Remove any existing colons
+        format!("{}:/{}", drive, clean_components[1..].join("/"))
+    } else {
+        format!("/{}", clean_components.join("/"))
+    };
+    
+    println!("Cleaned path: {}", clean_path);
+    
     #[cfg(target_os = "windows")]
     {
+        let windows_path = clean_path.replace("/", "\\");
+        println!("Windows formatted path: {}", windows_path);
         Command::new("explorer")
-            .arg(&path)
+            .args(["/select,", &windows_path])
             .spawn()
             .map_err(|e| format!("Failed to open explorer: {}", e))?;
     }
     #[cfg(target_os = "macos")]
     {
         Command::new("open")
-            .arg(&path)
+            .arg("-R")
+            .arg(&clean_path)
             .spawn()
             .map_err(|e| format!("Failed to open finder: {}", e))?;
     }
     #[cfg(target_os = "linux")]
     {
-        Command::new("xdg-open")
-            .arg(&path)
-            .spawn()
-            .map_err(|e| format!("Failed to open file manager: {}", e))?;
+        if let Some(parent) = std::path::Path::new(&clean_path).parent() {
+            Command::new("xdg-open")
+                .arg(parent)
+                .spawn()
+                .map_err(|e| format!("Failed to open file manager: {}", e))?;
+        }
     }
     
     Ok(())
@@ -268,7 +324,7 @@ async fn open_in_explorer(path: String) -> Result<(), String> {
 
 #[tauri::command]
 async fn debug_log(message: String) {
-    println!("Debug: {}", message);
+    // println!("Debug: {}", message);
 }
 
 fn main() {

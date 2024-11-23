@@ -87,7 +87,7 @@
       {
         "fullscreen": false,
         "center": true,
-        "height": 625,
+        "height": 635,
         "width": 900,
         "resizable": true,
         "title": "Project Maker",

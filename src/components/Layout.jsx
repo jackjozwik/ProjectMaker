@@ -16,7 +16,7 @@ const SidebarToggle = ({ showSidebar, onToggle }) => (
 
 // DirectoryTree component
 // Update only the DirectoryTree component in Layout.jsx
-const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, setToastMessage, basePath, selectedFolder, setSelectedFolder, setMenuHandler }) => {
+const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, setToastMessage, basePath, selectedFolder, setSelectedFolder, setMenuHandler, isDarkMode }) => {
   const [contextMenu, setContextMenu] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newFolderType, setNewFolderType] = useState(null);
@@ -24,8 +24,8 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
   const [isLoading, setIsLoading] = useState(false);
 
 
-  const handleMenuSelect = useCallback((type) => {
-    invoke('debug_log', { message: `Menu select called with type: ${type}` });
+  const handleMenuSelect = useCallback(async (type) => {
+    await invoke('debug_log', { message: `Menu select called with type: ${type}` });
     setNewFolderType(type);
     setNewFolderName('');
     setIsDialogOpen(true);
@@ -36,17 +36,22 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
   const fullPath = path ? `${path}/${node.name}` : node.name;
   const isProjectFolder = /^[A-Z]{3}_[A-Z]{3}$/.test(node.name);
 
+  const getAbsolutePath = () => {
+    return basePath ? `${basePath}/${fullPath}` : fullPath;
+  };
+
   useEffect(() => {
-    // Get the full node path for comparison
-    const nodePath = path ? `${path}/${node.name}` : node.name;
+    const logPaths = async () => {
+      await invoke('debug_log', { message: `Comparing nodePath: ${fullPath} with selectedFolder: ${selectedFolder}` });
 
-    invoke('debug_log', { message: `Comparing nodePath: ${nodePath} with selectedFolder: ${selectedFolder}` });
+      if (node && isProjectFolder && fullPath === selectedFolder) {
+        await invoke('debug_log', { message: `Setting menu handler for ${fullPath}` });
+        setMenuHandler(() => handleMenuSelect);
+      }
+    };
 
-    if (node && isProjectFolder && nodePath === selectedFolder) {
-      invoke('debug_log', { message: `Setting menu handler for ${nodePath}` });
-      setMenuHandler(() => handleMenuSelect);
-    }
-  }, [node, selectedFolder, isProjectFolder, handleMenuSelect, setMenuHandler, path]);
+    logPaths();
+  }, [node, selectedFolder, isProjectFolder, handleMenuSelect, setMenuHandler, fullPath]);
 
   if (!node) return null;
 
@@ -54,16 +59,24 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
   const hasChildren = node.children && node.children.length > 0;
   const isSelected = selectedFolder === fullPath;
 
-
-
-
-  const handleContextMenu = (e) => {
+  const handleContextMenu = async (e) => {
+    // Stop the event from bubbling up to parent directories
+    e.stopPropagation();
     e.preventDefault();
-    // Pass the full path for the selected node
+
+    // Check if we clicked directly on this directory item
+    const directoryItem = e.currentTarget.closest('.directory-item');
+    if (!directoryItem || !directoryItem.contains(e.target)) {
+      return;
+    }
+
+    const absolutePath = getAbsolutePath();
+    await invoke('debug_log', { message: `Context menu triggered for: ${absolutePath}` });
+
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
-      path: node.path || fullPath, // Use node.path if available, fallback to fullPath
+      path: absolutePath,
       isProjectFolder: isProjectFolder
     });
   };
@@ -266,6 +279,8 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
               'hover:bg-gray-100 dark:hover:bg-gray-700/50'
             }`}
           onClick={handleClick}
+          onContextMenu={handleContextMenu} // Move context menu handler here
+
         >
           <span className="directory-icon flex items-center justify-center w-4 h-4 text-gray-400 dark:text-gray-500">
             {hasChildren && (
@@ -280,16 +295,16 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
               <FolderOpen
                 size={16}
                 className="shrink-0"
-                stroke="#e4b650"  // Slightly darker border
+                stroke={isDarkMode ? "#eab308" : "#e4b650"}  // Dark: Yellow-500
                 strokeWidth={2}
-                fill="#f6cc57"    // Warm folder color
+                fill={isDarkMode ? "#ca8a04" : "#f6cc57"}    // Dark: Yellow-600
               /> :
               <Folder
                 size={16}
                 className="shrink-0"
-                stroke="#e4b650"
+                stroke={isDarkMode ? "#eab308" : "#e4b650"}  // Dark: Yellow-500
                 strokeWidth={2}
-                fill="#f6cc57"
+                fill={isDarkMode ? "#ca8a04" : "#f6cc57"}    // Dark: Yellow-600
               />
             }
           </span>
@@ -317,10 +332,11 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
                 expandedNodes={expandedNodes}
                 onRefresh={onRefresh}
                 setToastMessage={setToastMessage}
-                selectedFolder={selectedFolder}      // Add this
-                setSelectedFolder={setSelectedFolder}// Add this
-                setMenuHandler={setMenuHandler}      // Add this
+                selectedFolder={selectedFolder}
+                setSelectedFolder={setSelectedFolder}
+                setMenuHandler={setMenuHandler}
                 basePath={basePath}
+                isDarkMode={isDarkMode}  // Make sure this is being passed
               />
             ))}
         </div>
@@ -382,7 +398,7 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
 
 // Sidebar component
 const Sidebar = ({ showSidebar, directoryStructure, expandedNodes, onToggleNode, onRefresh, setToastMessage, basePath, selectedFolder,
-  setSelectedFolder, onMenuSelect, setMenuHandler }) => {
+  setSelectedFolder, onMenuSelect, setMenuHandler, isDarkMode }) => {
   if (!showSidebar) return null;
 
   return (
@@ -401,7 +417,7 @@ const Sidebar = ({ showSidebar, directoryStructure, expandedNodes, onToggleNode,
             setSelectedFolder={setSelectedFolder}
             onMenuSelect={onMenuSelect}
             setMenuHandler={setMenuHandler}  // Pass this through
-
+            isDarkMode={isDarkMode}
           />
         )}
       </div>

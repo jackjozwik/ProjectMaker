@@ -2,6 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import { Plus, Copy, Folder } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/tauri';
 
+// MODIFIED:
+// - Fixed path handling for menu actions
+// - Simplified event handling
+// - Added better debugging
 
 const ContextMenu = ({ x, y, onClose, onSelect, isProjectFolder, path }) => {
   const menuRef = useRef(null);
@@ -17,11 +21,33 @@ const ContextMenu = ({ x, y, onClose, onSelect, isProjectFolder, path }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
-  if (!isProjectFolder) return null;
+  useEffect(() => {
+    if (menuRef.current) {
+      const menu = menuRef.current;
+      const rect = menu.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+
+      // Check if menu overflows bottom
+      if (rect.bottom > viewportHeight) {
+        const newY = Math.max(0, viewportHeight - rect.height);
+        menu.style.top = `${newY}px`;
+      }
+
+      // Check if menu overflows right
+      if (rect.right > viewportWidth) {
+        const newX = Math.max(0, viewportWidth - rect.width);
+        menu.style.left = `${newX}px`;
+      }
+    }
+  }, [x, y]);
 
   const handleCopyPath = async () => {
     try {
-      await invoke('copy_to_clipboard', { text: path });
+      // Store path in a const to ensure it doesn't change
+      const pathToCopy = path;
+      await invoke('debug_log', { message: `Menu action - path before copy: ${pathToCopy}` });
+      await invoke('copy_to_clipboard', { text: pathToCopy });
       onClose();
     } catch (error) {
       console.error('Failed to copy path:', error);
@@ -30,7 +56,9 @@ const ContextMenu = ({ x, y, onClose, onSelect, isProjectFolder, path }) => {
 
   const handleOpenInExplorer = async () => {
     try {
-      await invoke('open_in_explorer', { path });
+      const pathToOpen = path;
+      await invoke('debug_log', { message: `Open in Explorer - Using path: ${pathToOpen}` });
+      await invoke('open_in_explorer', { path: pathToOpen });
       onClose();
     } catch (error) {
       console.error('Failed to open explorer:', error);
@@ -47,7 +75,6 @@ const ContextMenu = ({ x, y, onClose, onSelect, isProjectFolder, path }) => {
     { id: 'copy', label: 'Copy Path', icon: Copy, onClick: handleCopyPath },
     { id: 'explore', label: 'Open in Explorer', icon: Folder, onClick: handleOpenInExplorer },
   ];
-
 
   return (
     <div
@@ -74,9 +101,10 @@ const ContextMenu = ({ x, y, onClose, onSelect, isProjectFolder, path }) => {
         return (
           <button
             key={item.id}
-            onClick={() => {
+            onClick={async () => {
+              await invoke('debug_log', { message: `Menu item clicked: ${item.label}` });
               if (item.onClick) {
-                item.onClick();
+                await item.onClick();
               } else {
                 onSelect(item.id);
               }
@@ -94,5 +122,6 @@ const ContextMenu = ({ x, y, onClose, onSelect, isProjectFolder, path }) => {
     </div>
   );
 };
+
 
 export default ContextMenu;
