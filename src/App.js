@@ -43,6 +43,11 @@ function App() {
     localStorage.setItem('darkMode', isDarkMode);
   }, [isDarkMode]);
 
+  useEffect(() => {
+    if (basePath) {
+      actions.refreshDirectoryStructure();
+    }
+  }, []);
 
   const handleMenuAction = async (type) => {
     await invoke('debug_log', { message: `Action button clicked with type: ${type}` });

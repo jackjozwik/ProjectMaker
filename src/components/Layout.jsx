@@ -19,6 +19,7 @@ const SidebarToggle = ({ showSidebar, onToggle }) => (
 const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, setToastMessage, basePath, selectedFolder, setSelectedFolder, setMenuHandler, isDarkMode }) => {
   const [contextMenu, setContextMenu] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState(null); // 'create', 'rename', 'delete'
   const [newFolderType, setNewFolderType] = useState(null);
   const [newFolderName, setNewFolderName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,11 +27,55 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
 
   const handleMenuSelect = useCallback(async (type) => {
     await invoke('debug_log', { message: `Menu select called with type: ${type}` });
-    setNewFolderType(type);
-    setNewFolderName('');
-    setIsDialogOpen(true);
+
+    if (type === 'rename') {
+      setDialogMode('rename');
+      setNewFolderName(node.name);
+      setIsDialogOpen(true);
+    } else if (type === 'delete') {
+      setDialogMode('delete');
+      setIsDialogOpen(true);
+    } else {
+      setDialogMode('create');
+      setNewFolderType(type);
+      setNewFolderName('');
+      setIsDialogOpen(true);
+    }
     setContextMenu(null);
-  }, []);
+  }, [node]);
+
+  const handleRename = async () => {
+    try {
+      setIsLoading(true);
+      await invoke('rename_folder', {
+        oldPath: getAbsolutePath(),
+        newName: newFolderName
+      });
+      setToastMessage(`Successfully renamed folder to ${newFolderName}`);
+      await onRefresh();
+    } catch (error) {
+      setToastMessage(`Error: Failed to rename folder - ${error}`);
+    } finally {
+      setIsLoading(false);
+      setIsDialogOpen(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      setIsLoading(true);
+      await invoke('delete_folder', {
+        path: getAbsolutePath()
+      });
+      setToastMessage('Successfully deleted folder');
+      await onRefresh();
+    } catch (error) {
+      setToastMessage(`Error: Failed to delete folder - ${error}`);
+    } finally {
+      setIsLoading(false);
+      setIsDialogOpen(false);
+    }
+  };
 
   // Move these up before the hooks
   const fullPath = path ? `${path}/${node.name}` : node.name;
@@ -357,36 +402,77 @@ const DirectoryTree = ({ node, path = '', onToggle, expandedNodes, onRefresh, se
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Add {newFolderType === 'asset' ? 'Asset' : newFolderType === 'rnd' ? 'R&D' : 'Shot'}
+              {dialogMode === 'rename' ? 'Rename Folder' :
+                dialogMode === 'delete' ? 'Delete Folder' :
+                  `Add ${newFolderType === 'asset' ? 'Asset' : newFolderType === 'rnd' ? 'R&D' : 'Shot'}`}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="py-4">
-            <input
-              type="text"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={`Enter ${newFolderType === 'asset' ? 'asset' : newFolderType === 'rnd' ? 'R&D' : 'shot'} name`}
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-gray-400"
-              autoFocus
-            />
-          </div>
+          {dialogMode === 'delete' ? (
+            <div className="py-4"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleDelete();
+                } else if (e.key === 'Escape') {
+                  setIsDialogOpen(false);
+                }
+              }}
+              tabIndex={0} // Make div focusable
+            >
+              <p className="text-red-600 dark:text-red-400">
+                Are you sure you want to delete this folder and ALL its file contents?
+                This action cannot be undone!
+              </p>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">
+                Note: This will delete all related folders in maya, houdini, nuke, and other project directories.
+              </p>
+            </div>
+          ) : (
+            <div className="py-4">
+              <input
+                type="text"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newFolderName) {
+                    if (dialogMode === 'rename') {
+                      handleRename();
+                    } else {
+                      createFolders();
+                    }
+                  } else if (e.key === 'Escape') {
+                    setIsDialogOpen(false);
+                  }
+                }}
+                placeholder={dialogMode === 'rename' ? 'New name' :
+                  `Enter ${newFolderType === 'asset' ? 'asset' : newFolderType === 'rnd' ? 'R&D' : 'shot'} name`}
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-gray-400"
+                autoFocus
+              />
+            </div>
+          )}
 
           <DialogFooter>
             <button
               onClick={() => setIsDialogOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-gray-400"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-gray-400" 
             >
               Cancel
             </button>
             <button
-              onClick={createFolders}
-              disabled={!newFolderName || isLoading}
-              className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none  dark:bg-emerald-600 hover:bg-blue-700 dark:hover:bg-emerald-700 ${(!newFolderName || isLoading) ? 'opacity-50 cursor-not-allowed dark:bg-emerald-600 hover:bg-blue-700 dark:hover:bg-emerald-700' : ''
-                }`}
+              onClick={dialogMode === 'rename' ? handleRename :
+                dialogMode === 'delete' ? handleDelete :
+                  createFolders}
+              disabled={(!newFolderName && dialogMode !== 'delete') || isLoading}
+              className={`px-4 py-2 text-sm font-medium text-white rounded-md
+                ${dialogMode === 'delete'
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : 'bg-blue-600 hover:bg-blue-700 dark:hover:bg-emerald-800/40 dark:border-emerald-600 dark:bg-emerald-600/40'} 
+                ${(!newFolderName && dialogMode !== 'delete') || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {isLoading ? 'Creating...' : 'Create'}
+              {isLoading ? 'Processing...' :
+                dialogMode === 'rename' ? 'Rename' :
+                  dialogMode === 'delete' ? 'Delete' : 'Create'}
             </button>
           </DialogFooter>
         </DialogContent>

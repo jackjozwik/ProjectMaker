@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Plus, Copy, Folder } from 'lucide-react';
+import { Plus, Copy, Folder, Pencil, Trash2 } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/tauri';
 
 // MODIFIED:
@@ -7,7 +7,7 @@ import { invoke } from '@tauri-apps/api/tauri';
 // - Simplified event handling
 // - Added better debugging
 
-const ContextMenu = ({ x, y, onClose, onSelect, isProjectFolder, path }) => {
+const ContextMenu = ({ x, y, onClose, onSelect, isProjectFolder, path, isProjectRoot}) => {
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -65,6 +65,30 @@ const ContextMenu = ({ x, y, onClose, onSelect, isProjectFolder, path }) => {
     }
   };
 
+  const handleRename = async () => {
+    try {
+      await invoke('debug_log', { message: `Rename triggered for: ${path}` });
+      onSelect('rename');
+      onClose();
+    } catch (error) {
+      console.error('Failed to initiate rename:', error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await invoke('debug_log', { message: `Delete triggered for: ${path}` });
+      onSelect('delete');
+      onClose();
+    } catch (error) {
+      console.error('Failed to initiate delete:', error);
+    }
+  };
+
+  // Determine if this is an asset/shot/rnd folder
+  const isProjectSubfolder = /\/(asset|shot|rnd)s?\/[^\/]+$/.test(path);
+
+
   const menuItems = [
     ...(isProjectFolder ? [
       { id: 'asset', label: 'Add Asset', icon: Plus },
@@ -74,6 +98,11 @@ const ContextMenu = ({ x, y, onClose, onSelect, isProjectFolder, path }) => {
     ] : []),
     { id: 'copy', label: 'Copy Path', icon: Copy, onClick: handleCopyPath },
     { id: 'explore', label: 'Open in Explorer', icon: Folder, onClick: handleOpenInExplorer },
+    ...(!isProjectRoot ? [
+      { type: 'separator' },
+      { id: 'rename', label: 'Rename', icon: Pencil, onClick: handleRename },
+      { id: 'delete', label: 'Delete', icon: Trash2, color: 'text-red-500', onClick: handleDelete }
+    ] : [])
   ];
 
   return (
