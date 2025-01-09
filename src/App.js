@@ -147,14 +147,15 @@ function App() {
                   </div>
                 </div>
 
+                {/* TODO: SWAPPED PROJECT AND ARTIST CODE LABELS BUT KEPT LOGIC - NEEDS TO BE CHANGED */}
                 {/* Artist Code */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">
-                    Artist Code
+                    Project Code
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g., NDH"
+                    placeholder="e.g., CPS"
                     value={artistRef}
                     onChange={actions.handleArtistRefChange}
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-100 dark:placeholder-gray-400  dark:focus:ring-gray-400 dark:focus:border-gray-400"
@@ -165,14 +166,15 @@ function App() {
                   )}
                 </div>
 
+                {/* TODO: SWAPPED PROJECT AND ARTIST CODE LABELS BUT KEPT LOGIC - NEEDS TO BE CHANGED */}
                 {/* Project Code */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">
-                    Project Code
+                    Artist Code
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g., CPS"
+                    placeholder="e.g., JAK"
                     value={projectRef}
                     onChange={actions.handleProjectRefChange}
                     className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-gray-400 dark:focus:border-gray-400"
