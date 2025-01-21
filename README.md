@@ -1,70 +1,171 @@
-# Getting Started with Create React App
+# Project Maker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A desktop application built with Tauri (Rust) and React for managing VFX project directories. Creates standardized project folders following the naming pattern: `<3 letter artist code>_<3 letter project code>`.
 
-## Available Scripts
+![Project Maker Screenshot](screenshot.png)
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- Create standardized VFX project directories
+- Dark/Light mode support with persistent theme settings
+- Context menu for quick actions:
+  - Copy path
+  - Open in Explorer
+  - Add Asset/R&D/Shot with standardized sub-directories
+- Directory tree visualization
+- Template system for custom project structures
+- Split panel interface with resizable panels
+- Custom frameless window with Windows-style controls
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Tech Stack
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Frontend**: React + Tailwind CSS
+- **Backend**: Rust + Tauri
+- **UI Components**: 
+  - Lucide Icons
+  - shadcn/ui components
+  - Custom TitleBar
+  - React Split Panels
 
-### `npm test`
+## Development Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Node.js LTS (22.11.0 required - newer versions may have issues)
+- Rust (latest stable)
+- Windows Build Tools (for Windows development)
 
-### `npm run build`
+## Installation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/project-maker.git
+cd project-maker
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. Install Node.js dependencies:
+```bash
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3. Run in development mode:
+```bash
+npm run tauri:dev
+```
 
-### `npm run eject`
+## Building
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. Ensure you have the correct Node.js version:
+```bash
+# Install nvm-windows if needed
+nvm install 22.11.0
+nvm use 22.11.0
+node -v  # Should be v22.11.0
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. Place your icon in the correct location:
+```
+src-tauri/icons/icon.png  # For application icon
+src/assets/icon.png       # For title bar icon
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+3. Build the application:
+```bash
+npm run tauri:build
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+The built application will be available in:
+- NSIS Installer: `src-tauri/target/release/bundle/nsis/`
+- MSI Installer: `src-tauri/target/release/bundle/msi/`
+- Executable: `src-tauri/target/release/`
 
-## Learn More
+## Template System
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Project Maker supports custom templates via JSON files. Two example templates are provided:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Standard VFX Template
+```json
+{
+    "name": "Standard VFX Template",
+    "description": "Default VFX project structure",
+    "directories": [
+        "maya/assets",
+        "maya/scenes",
+        // ... other directories
+    ],
+    "base_files": [
+        {
+            "source": "path/to/template.ma",
+            "destination": "maya/scenes/template.ma"
+        }
+    ]
+}
+```
 
-### Code Splitting
+### Empty Template
+```json
+{
+    "name": "Empty Template",
+    "description": "Minimal template with no predefined structure",
+    "directories": [],
+    "base_files": []
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+**Note**: Template JSON files must not contain trailing commas.
 
-### Analyzing the Bundle Size
+## Project Structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```
+project-maker/
+├── src/
+│   ├── assets/           # Frontend assets (icons, images)
+│   ├── components/       # React components
+│   │   ├── ActionButtons.jsx
+│   │   ├── ContextMenu.jsx
+│   │   ├── Layout.jsx
+│   │   ├── ThemeToggle.jsx
+│   │   └── TitleBar.jsx
+│   ├── hooks/           # Custom React hooks
+│   └── types/           # Type definitions
+├── src-tauri/
+│   ├── icons/           # Application icons
+│   └── src/             # Rust backend code
+│       └── main.rs      # Core functionality
+├── public/              # Static assets
+└── package.json        # Project configuration
+```
 
-### Making a Progressive Web App
+## Known Issues & Solutions
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+1. Node.js Version:
+   - Must use Node.js 22.11.0 LTS
+   - Newer versions may cause build issues
+   - Use nvm-windows to manage Node.js versions
 
-### Advanced Configuration
+2. Icon Requirements:
+   - Application icon: `src-tauri/icons/icon.png`
+   - Title bar icon: `src/assets/icon.png`
+   - Minimum size: 512x512 pixels
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+3. Template JSON:
+   - Must not contain trailing commas
+   - Requires all properties even if empty
+   - Paths should use forward slashes
 
-### Deployment
+## Contributing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-### `npm run build` fails to minify
+## License
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+[Your License Here]
+
+## Acknowledgments
+
+- The Tauri Team for the framework
+- Lucide for icons
+- React Split for the panel system
+- shadcn/ui for UI components
